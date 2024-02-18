@@ -4,7 +4,7 @@
 * Driver  : RCC Driver
 * Machine : ARM 
 * MC      : STM32F401xC 
-* Auther  : Alaa Ghita
+* Author  : Alaa Ghita
 * Date    : Feb 2024
 * 
 */
@@ -26,7 +26,7 @@
  #define SYSCLK_CLR_MASK           (~(0x3))
  #define SYSCLK_USED               2
 
- #define PLLSCR_CLR_MASK           (~(BIT22_MASK))
+ #define PLLSRC_CLR_MASK           (~(BIT22_MASK))
  #define PLLM_POS                  0
  #define PLLN_POS                  6
  #define PLLP_POS                  16
@@ -95,8 +95,11 @@
     case CLK_ON_PLL:
     case CLK_ON_PLLI2S:
       (RCC->CR) |= (CLK_ON);
-      while((CLK_ON<<1)&RCC->CR || Loc_u8Timeout!=0)
+      while(!((CLK_ON<<1)&RCC->CR) && Loc_u8Timeout!=0)
+      {
         Loc_u8Timeout--;
+        Ret_enuErrorStatus = enuErrorStatus_timeout;
+      }
       break;
     case CLK_ON_CSS:
     case CLK_ON_HSEBYP:
@@ -167,7 +170,7 @@
     switch(SYSCLK)
     {
       case SYSCLK_HSI:
-        if(RCC->CR & RDY_HSI)
+        if(RCC->CR & HSI_RDY)
         {
           Loc_u32RCC_CFGR_Value  = RCC->CFGR;
           Loc_u32RCC_CFGR_Value &= SYSCLK_CLR_MASK;
@@ -180,7 +183,7 @@
         }
         break;
       case SYSCLK_HSE:
-        if(RCC->CR & RDY_HSE)
+        if(RCC->CR & HSE_RDY)
         {
           Loc_u32RCC_CFGR_Value  = RCC->CFGR;
           Loc_u32RCC_CFGR_Value &= SYSCLK_CLR_MASK;
@@ -193,7 +196,7 @@
         }
         break;
       case SYSCLK_PLL:
-        if(RCC->CR & RDY_PLL)
+        if(RCC->CR & PLL_RDY)
         {
           Loc_u32RCC_CFGR_Value  = RCC->CFGR;
           Loc_u32RCC_CFGR_Value &= SYSCLK_CLR_MASK;
@@ -217,18 +220,18 @@
    return GetSysCLK();
  }
 
- enuErrorStatus_t RCC_SelectPLLSrc(uint32_t PLLSCR)
+ enuErrorStatus_t RCC_SelectPLLSrc(uint32_t PLLSRC)
  {
    enuErrorStatus_t Ret_enuErrorStatus = enuErrorStatus_Ok;
    uint32_t Loc_u32RCC_PLLCFGR_Value = RCC->PLLCFGR;
 
-    switch(PLLSCR)
+    switch(PLLSRC)
     {
-      case PLLSCR_HSI:
-        if(RCC->CR & RDY_HSI)
+      case PLLSRC_HSI:
+        if(RCC->CR & HSI_RDY)
         {
-         Loc_u32RCC_PLLCFGR_Value &= PLLSCR_CLR_MASK;
-         Loc_u32RCC_PLLCFGR_Value |= PLLSCR;
+         Loc_u32RCC_PLLCFGR_Value &= PLLSRC_CLR_MASK;
+         Loc_u32RCC_PLLCFGR_Value |= PLLSRC;
          RCC->PLLCFGR              = Loc_u32RCC_PLLCFGR_Value;
         }
         else
@@ -237,10 +240,10 @@
        }
       break;
     case PLLSRC_HSE:
-      if(RCC->CR & RDY_HSE)
+      if(RCC->CR & HSE_RDY)
       {
-        Loc_u32RCC_PLLCFGR_Value &= PLLSCR_CLR_MASK;
-        Loc_u32RCC_PLLCFGR_Value |= PLLSCR;
+        Loc_u32RCC_PLLCFGR_Value &= PLLSRC_CLR_MASK;
+        Loc_u32RCC_PLLCFGR_Value |= PLLSRC;
         RCC->PLLCFGR              = Loc_u32RCC_PLLCFGR_Value;
       }
       else
@@ -262,7 +265,7 @@
 
    if((Copy_M>1 && Copy_M<64) 
       && (Copy_N>1 && Copy_N<511 && Copy_N!=433)
-      && (Copy_p>1 && Copy_P<9)
+      && (Copy_P>1 && Copy_P<9)
       && (Copy_Q>1 && Copy_Q<16))
    {
     Copy_P = (Copy_P/2)>>1;
@@ -302,8 +305,17 @@
    return Ret_enuErrorStatus;
  }
 
+ void RCC_EnablePeri(uint32_t REG, uint32_t PERI)
+ {
+  *((&RCC->CR)+REG) |= PERI;
+ }
 
-   uint8_t GetSysCLK()
+ void RCC_DisablePeri(uint32_t REG, uint32_t PERI)
+ {
+  *((&RCC->CR)+REG) &= (~PERI);
+ }
+
+ uint8_t GetSysCLK()
  {
    return (~SYSCLK_CLR_MASK & ((RCC->CFGR)>>SYSCLK_USED));
  }
