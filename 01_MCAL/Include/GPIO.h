@@ -3,6 +3,7 @@
 * @file    : Header File
 * @author  : Alaa Ghita
 * @date    : Feb 2024
+* @version : 0.1v
 * Driver   : GPIO Driver
 * Machine  : STM32F401xC 
 * 
@@ -46,21 +47,16 @@
 
  /*GPIO Modes Options*/                   
  #define GPIO_MODE_IN                      0x00000000      /*Input Pin (without Pullup nor Pulldown)*/
- #define GPIO_MODE_IN_PU                   0x00000004      /*Input Pullup Pin*/
- #define GPIO_MODE_IN_PD                   0x00000008      /*Input Pulldown Pin*/
  #define GPIO_MODE_OUT_PP                  0x00000001      /*Output Pin of type PushPull (without Pullup nor Pulldown)*/       
- #define GPIO_MODE_OUT_PP_PU               0x00000005      /*Output Pullup Pin of type PushPull*/ 
- #define GPIO_MODE_OUT_PP_PD               0x00000009      /*Output Pulldown Pin of type PushPull*/
  #define GPIO_MODE_OUT_OD                  0x00000011      /*Output Pin of type OpenDrain*/
- #define GPIO_MODE_OUT_OD_PU               0x00000015      /*Output Pullup Pin of type OpenDrain*/
- #define GPIO_MODE_OUT_OD_PD               0x00000019      /*Output Pulldown Pin of type OpenDrain*/
- #define GPIO_MODE_AF                      0x00000002      /*Alternate Function Pin Pin of type PushPull (without Pullup nor Pulldown)*/
- #define GPIO_MODE_AF_PP_PU                0x00000006      /*Alternate Function Pullup Pin of type PushPull*/
- #define GPIO_MODE_AF_PP_PD                0x0000000a      /*Alternate Function Pulldown Pin of type PushPull*/
- #define GPIO_MODE_AF_OD                   0x00000012      /*Alternate Function Pin Pin of type OpenDrain (without Pullup nor Pulldown)*/
- #define GPIO_MODE_AF_OD_PU                0x00000016      /*Alternate Function Pullup Pin of type OpenDrain*/
- #define GPIO_MODE_AF_OD_PD                0x0000001a      /*Alternate Function Pulldown Pin of type OpenDrain*/
+ #define GPIO_MODE_AF_PP                   0x00000002      /*Alternate Function Pin of type PushPull (without Pullup nor Pulldown)*/
+ #define GPIO_MODE_AF_OD                   0x00000012      /*Alternate Function Pin of type OpenDrain (without Pullup nor Pulldown)*/
  #define GPIO_MODE_ANALOG                  0x00000003      /*Analog pin*/
+
+ /*GPIO Pull-up Pull-down Options*/
+ #define GPIO_PUPD_NONE                    0x00000000     /*No Pull-up Nor Pull-down*/
+ #define GPIO_PUPD_PU                      0x00000001     /*Pull-up*/
+ #define GPIO_PUPD_PD                      0x00000002     /*Pull-down*/
 
  /*GPIO Output Speed Options*/
  #define GPIO_OSPEED_LOW                   0x00000000
@@ -69,43 +65,45 @@
  #define GPIO_OSPEED_VERYHIGH              0x00000003
 
  /*GPIO Alternate Function Options*/
- #define GPIO_AF_0                               0x00
- #define GPIO_AF_1                               0x01
- #define GPIO_AF_2                               0x02
- #define GPIO_AF_3                               0x03
- #define GPIO_AF_4                               0x04
- #define GPIO_AF_5                               0x05
- #define GPIO_AF_6                               0x06
- #define GPIO_AF_7                               0x07
- #define GPIO_AF_8                               0x08
- #define GPIO_AF_9                               0x09
- #define GPIO_AF_10                              0x0a
- #define GPIO_AF_11                              0x0b
- #define GPIO_AF_12                              0x0c
- #define GPIO_AF_13                              0x0d
- #define GPIO_AF_14                              0x0e
- #define GPIO_AF_15                              0x0f
+ #define GPIO_AF_0                         0x00
+ #define GPIO_AF_1                         0x01
+ #define GPIO_AF_2                         0x02
+ #define GPIO_AF_3                         0x03
+ #define GPIO_AF_4                         0x04
+ #define GPIO_AF_5                         0x05
+ #define GPIO_AF_6                         0x06
+ #define GPIO_AF_7                         0x07
+ #define GPIO_AF_8                         0x08
+ #define GPIO_AF_9                         0x09
+ #define GPIO_AF_10                        0x0a
+ #define GPIO_AF_11                        0x0b
+ #define GPIO_AF_12                        0x0c
+ #define GPIO_AF_13                        0x0d
+ #define GPIO_AF_14                        0x0e
+ #define GPIO_AF_15                        0x0f
 
  /*Pin Output Value Options*/
- #define PIN_VALUE_HIGH                          0x01
- #define PIN_VALUE_LOW                           0x02
+ #define PIN_VALUE_HIGH                    0x01
+ #define PIN_VALUE_LOW                     0x02
 
 /*********/
 
 /*Types*/
  
+ /**
+ * @brief : The options allowed for each member in this struct is metioned above
+ * @note  : In stm32f401xc Port C has only pin13, pin14, and pin15. While both Ports A & B Support all the pins from 0 to 15
+ */
  typedef struct
  {
-    /**
-    * @brief : The options allowed for each member in this struct is metioned above
-    * @note  : In stm32f401xc Port C has only pin13, pin14, and pin15. While both Ports A & B Support all the pins from 0 to 15
-    */
     uint32_t GPIO_PORT;
     uint32_t GPIO_PIN;
     uint32_t GPIO_MODE;
+    uint32_t GPIO_PUPD;
     uint32_t GPIO_OSPEED;
 
  }GPIO_PinCfg_t;
+
 
  typedef enum
  {
@@ -124,13 +122,13 @@
     /**
 	*@brief : The Function Timed out.
 	*/ 
-    enuErrorStatus_timeout,
+    enuErrorStatus_Timeout,
     /**
 	*@brief : The Function Timed out.
 	*/ 
     enuErrorStatus_InvalidParameter,
     /**
-    *@brief : Something wrong in the configurations
+    *@brief : Something is wrong in the configurations
     */
     enuErrorStatus_InvalidCfg
 

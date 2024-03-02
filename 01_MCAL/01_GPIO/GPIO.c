@@ -3,6 +3,7 @@
 * @file    : Source File
 * @author  : Alaa Ghita
 * @date    : Feb 2024
+* @version : 0.1v
 * Driver   : GPIO Driver
 * Machine  : STM32F401xC 
 * 
@@ -24,7 +25,6 @@
  */
 
  #define GPIO_MODE_MASK             0x00000002
- #define GPIO_PUPD_MASK             0x0000000c
  #define GPIO_OTYPE_MASK            0x00000020
 
  #define MASK_1BIT                  0x00000001
@@ -35,31 +35,23 @@
  #define IS_VALID_PORT_PIN(PORT, PIN)         ((((PORT) == GPIO_PORT_A)  || \
                                                 ((PORT) == GPIO_PORT_B)) && \
                                                (((PIN) >= GPIO_PIN_0)    && \
-                                                ((PIN) <= GPIO_PIN_15)))   || \
+                                                ((PIN) <= GPIO_PIN_15))) || \
                                               (((PORT) == GPIO_PORT_C)   && \
                                                (((PIN) >= GPIO_PIN_13)   && \
                                                 ((PIN) <= GPIO_PIN_15)))
 
- #define IS_VALID_MODE(MODE)            (  ((MODE) == GPIO_MODE_IN)         || ((MODE) == GPIO_MODE_IN_PU) \
-                                        || ((MODE) == GPIO_MODE_IN_PD)      || ((MODE) == GPIO_MODE_OUT_PP) \
-                                        || ((MODE) == GPIO_MODE_OUT_PP_PU)  || ((MODE) == GPIO_MODE_OUT_PP_PD) \
-                                        || ((MODE) == GPIO_MODE_OUT_OD)     || ((MODE) == GPIO_MODE_OUT_OD_PU) \
-                                        || ((MODE) == GPIO_MODE_OUT_OD_PD)  || ((MODE) == GPIO_MODE_AF) \
-                                        || ((MODE) == GPIO_MODE_AF_PU)      || ((MODE) == GPIO_MODE_AF_PD) \
-                                        || ((MODE) == GPIO_MODE_AF_PP_PU)   || ((MODE) == GPIO_MODE_AF_PP_PD) \
-                                        || ((MODE) == GPIO_MODE_AF_OD)      || ((MODE) == GPIO_MODE_AF_OD_PU) \
-                                        || ((MODE) == GPIO_MODE_AF_OD_PD)   || ((MODE) == GPIO_MODE_ANALOG)   ) \
+ #define IS_VALID_MODE(MODE)        (  ((MODE) == GPIO_MODE_IN)       || ((MODE) == GPIO_MODE_OUT_PP) \
+                                    || ((MODE) == GPIO_MODE_OUT_OD)   || ((MODE) == GPIO_MODE_AF_PP)  \
+                                    || ((MODE) == GPIO_MODE_AF_OD)    || ((MODE) == GPIO_MODE_ANALOG) )
 
- #define IS_VALID_OSPEED(SPEED)          (  ((SPEED) == GPIO_OSPEED_LOW)    || ((SPEED) == GPIO_OSPEED_MEDIUM) \ 
-                                         || ((SPEED) == GPIO_OSPEED_HIGH)   || ((SPEED) == GPIO_OSPEED_VERYHIGH))
+ #define IS_VALID_OSPEED(SPEED)      (  ((SPEED) == GPIO_OSPEED_LOW)  || ((SPEED) == GPIO_OSPEED_MEDIUM) \ 
+                                     || ((SPEED) == GPIO_OSPEED_HIGH) || ((SPEED) == GPIO_OSPEED_VERYHIGH))
 
- #define IS_VALID_OUTPUT(MODE)          (  ((MODE) == GPIO_MODE_OUT_PP)     || ((MODE) == GPIO_MODE_OUT_PP_PU) \
-                                        || ((MODE) == GPIO_MODE_OUT_PP_PD)  || ((MODE) == GPIO_MODE_OUT_OD) \ 
-                                        || ((MODE) == GPIO_MODE_OUT_OD_PU)  || ((MODE) == GPIO_MODE_OUT_OD_PD) \
-                                        || ((MODE) == GPIO_MODE_AF)         || ((MODE) == GPIO_MODE_AF_PU) \
-                                        || ((MODE) == GPIO_MODE_AF_PD)      || ((MODE) == GPIO_MODE_AF_PP_PU) \
-                                        || ((MODE) == GPIO_MODE_AF_PP_PD)   || ((MODE) == GPIO_MODE_AF_OD) \
-                                        || ((MODE) == GPIO_MODE_AF_OD_PU)   || ((MODE) == GPIO_MODE_AF_OD_PD)  )
+ #define IS_VALID_OUTPUT(MODE)      (  ((MODE) == GPIO_MODE_OUT_PP)   || ((MODE) == GPIO_MODE_OUT_OD) \ 
+                                    || ((MODE) == GPIO_MODE_AF_PP)    || ((MODE) == GPIO_MODE_AF_OD)  )
+
+ #define IS_VALID_PULL(PULL)        (  ((PULL) == GPIO_PUPD_NONE)     || ((PULL) == GPIO_PUPD_PU) \ 
+                                    || ((PULL) == GPIO_PUPD_PD) )
 
  #define IS_VALID_VALUE(VALUE)       ( ((VALUE) == PIN_VALUE_HIGH) || ((VALUE) == PIN_VALUE_LOW))
 
@@ -102,7 +94,7 @@ static volatile GPIOx_t * const GPIOx [] =
  {
     enuErrorStatus_t Ret_enuErrorStatus = enuErrorStatus_NotOk;
 
-    static volatile GPIOx_t * const GPIO;
+    static volatile GPIOx_t * const GPIO = GPIOx[Pin_Cfg->GPIO_PORT];
     uint32_t Loc_u32GPIO_Temp_Value;
     if(Pin_Cfg == NULL)
     {
@@ -110,33 +102,33 @@ static volatile GPIOx_t * const GPIOx [] =
     }
     else if((IS_VALID_PORT_PIN(Pin_Cfg->GPIO_PORT,Pin_Cfg->GPIO_PIN) == 0)
            || (IS_VALID_MODE(Pin_Cfg->GPIO_OSPEED) == 0)
-           || (IS_VALID_OSPEED(Pin_Cfg->GPIO_OSPEED == 0))) 
+           || (IS_VALID_OSPEED(Pin_Cfg->GPIO_OSPEED == 0))
+           || (IS_VALID_PULL(Pin_Cfg->GPIO_PUPD) == 0)) 
     {
       Ret_enuErrorStatus = enuErrorStatus_InvalidCfg;
     }
     else
     {
       Ret_enuErrorStatus = enuErrorStatus_Ok;
-
-      GPIO = GPIOx[Pin_Cfg->GPIO_PORT];
       Loc_u32GPIO_Temp_Value  = GPIO->MODER;
       Loc_u32GPIO_Temp_Value &= ~(MASK_2BITS<<(Pin_Cfg->GPIO_PIN * 2));
-      Loc_u32GPIO_Temp_Value |= ((GPIO_MODE_MASK)&(Pin_Cfg->GPIO_MODE));
+      Loc_u32GPIO_Temp_Value |= (((GPIO_MODE_MASK)&(Pin_Cfg->GPIO_MODE))<<(Pin_Cfg->GPIO_PIN * 2));
       GPIO->MODER             = Loc_u32GPIO_Temp_Value;
-
-      Loc_u32GPIO_Temp_Value  = GPIO->PUPDR;
-      Loc_u32GPIO_Temp_Value &= ~(MASK_2BITS<<(Pin_Cfg->GPIO_PIN * 2));
-      Loc_u32GPIO_Temp_Value |= ((GPIO_PUPD_MASK)&(Pin_Cfg->GPIO_MODE));
-      GPIO->PUPDR             = Loc_u32GPIO_Temp_Value;
 
       Loc_u32GPIO_Temp_Value  = GPIO->OTYPER;
       Loc_u32GPIO_Temp_Value &= ~(MASK_1BIT<<Pin_Cfg->GPIO_PIN);
-      Loc_u32GPIO_Temp_Value |= ((GPIO_OTYPE_MASK)&(Pin_Cfg->GPIO_MODE));
+      Loc_u32GPIO_Temp_Value |= (((GPIO_OTYPE_MASK)&(Pin_Cfg->GPIO_MODE))<<(Pin_Cfg->GPIO_PIN * 2));
       GPIO->OTYPER            = Loc_u32GPIO_Temp_Value;
+
+      
+      Loc_u32GPIO_Temp_Value  = GPIO->PUPDR;
+      Loc_u32GPIO_Temp_Value &= ~(MASK_2BITS<<(Pin_Cfg->GPIO_PIN * 2));
+      Loc_u32GPIO_Temp_Value |= ((Pin_Cfg->GPIO_PUPD)<<(Pin_Cfg->GPIO_PIN * 2));
+      GPIO->PUPDR             = Loc_u32GPIO_Temp_Value;
 
       Loc_u32GPIO_Temp_Value  = GPIO->OSPEEDR;
       Loc_u32GPIO_Temp_Value &= ~(MASK_2BITS<<(Pin_Cfg->GPIO_PIN * 2));
-      Loc_u32GPIO_Temp_Value |= Pin_Cfg->GPIO_OSPEED;
+      Loc_u32GPIO_Temp_Value |= ((Pin_Cfg->GPIO_OSPEED)<<(Pin_Cfg->GPIO_PIN * 2));
       GPIO->OSPEEDR           = Loc_u32GPIO_Temp_Value;
 
     }
@@ -153,8 +145,9 @@ static volatile GPIOx_t * const GPIOx [] =
       Ret_enuErrorStatus = enuErrorStatus_NULLPointer;
     }
     else if((IS_VALID_PORT_PIN(Pin_Cfg->GPIO_PORT,Pin_Cfg->GPIO_PIN) == 0)
-           || (IS_VALID_OUTPUT(Pin_Cfg->GPIO_OSPEED) == 0)
-           || (IS_VALID_OSPEED(Pin_Cfg->GPIO_OSPEED == 0))) 
+           || (IS_VALID_OUTPUT(Pin_Cfg->GPIO_MODE) == 0)
+           || (IS_VALID_OSPEED(Pin_Cfg->GPIO_OSPEED) == 0)
+           || (IS_VALID_PULL(Pin_Cfg->GPIO_PUPD) == 0)) 
     {
       Ret_enuErrorStatus = enuErrorStatus_InvalidCfg;
     }
@@ -180,7 +173,8 @@ static volatile GPIOx_t * const GPIOx [] =
     }
     else if((IS_VALID_PORT_PIN(Pin_Cfg->GPIO_PORT,Pin_Cfg->GPIO_PIN) == 0)
            || (IS_VALID_MODE(Pin_Cfg->GPIO_OSPEED) == 0)
-           || (IS_VALID_OSPEED(Pin_Cfg->GPIO_OSPEED == 0))) 
+           || (IS_VALID_OSPEED(Pin_Cfg->GPIO_OSPEED == 0))
+           || (IS_VALID_PULL(Pin_Cfg->GPIO_PUPD) == 0)) 
     {
       Ret_enuErrorStatus = enuErrorStatus_InvalidCfg;
     }
