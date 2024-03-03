@@ -87,7 +87,7 @@
  *            enuErrorStatus_InvalidParameter   : One or Two of the parameters is not valid
                                                   (Either the LED doesn't exists, or The LED_STATE is not correct) 
  */
- enuErrorStatus_t LED_SetStatus(uint32_t Copy_u32LED, uint8_t LED_STATE);
+ enuErrorStatus_t LED_SetStatus(uint32_t Copy_u32LED, uint32_t LED_STATE);
 /********************************************************************************************************/
 
 

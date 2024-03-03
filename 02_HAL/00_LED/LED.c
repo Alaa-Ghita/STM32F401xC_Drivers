@@ -78,7 +78,7 @@
    return Ret_enuErrorStatus;
  }
  
- enuErrorStatus_t LED_SetStatus(uint32_t Copy_u32LED, uint8_t LED_STATE)
+ enuErrorStatus_t LED_SetStatus(uint32_t Copy_u32LED, uint32_t LED_STATE)
  {
    enuErrorStatus_t Ret_enuErrorStatus = enuErrorStatus_NotOk;
    if((IS_VALID_STATE(LED_STATE) == 0) || (IS_VALID_LED(Copy_u32LED) == 0))
@@ -88,7 +88,7 @@
    else
    {
       Ret_enuErrorStatus = enuErrorStatus_Ok;
-      Ret_enuErrorStatus = GPIO_SetPinValue( &LEDs[Copy_u32LED].Pin , (LEDs[Copy_u32LED].Connection)^LED_STATE);
+      Ret_enuErrorStatus = GPIO_SetPinValue( &LEDs[Copy_u32LED].Pin, (LEDs[Copy_u32LED].Connection)^LED_STATE);
    }
    return Ret_enuErrorStatus;
  }
