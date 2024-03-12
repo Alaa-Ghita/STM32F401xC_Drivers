@@ -18,8 +18,8 @@
 
 
 /************************************************Defines*************************************************/
- #define IS_VALID_CONNECTION(CONNECTION)        (((CONNECTION) == Switch_CONNECTION_FORWARD) \
-                                                || ((CONNECTION) == Switch_CONNECTION_REVERSE))
+ #define IS_VALID_CONNECTION(CONNECTION)        (((CONNECTION) == SWITCH_CONNECTION_FORWARD) \
+                                                || ((CONNECTION) == SWITCH_CONNECTION_REVERSE))
 
  #define IS_VALID_Switch(SWITCH)                      ((SWITCH) < _Switch_num)
 
@@ -50,7 +50,7 @@
    GPIO_PinCfg_t Loc_CurrentSwitch;
    Loc_CurrentSwitch.GPIO_MODE = GPIO_MODE_IN;
    Loc_CurrentSwitch.GPIO_OSPEED = GPIO_OSPEED_HIGH;
-   for(Loc_u8Counter < _Switch_num)
+   for(Loc_u8Counter = 0;Loc_u8Counter < _Switch_num; Loc_u8Counter++)
    {
       if(IS_VALID_CONNECTION(Switches[Loc_u8Counter].Connection))
       {
@@ -79,7 +79,7 @@
    {
       Ret_enuErrorStatus = enuErrorStatus_InvalidParameter;
    }
-   else if(Add_u8SwitchState == NULL)
+   else if(Add_enuSwitchState == NULL)
    {
       Ret_enuErrorStatus = enuErrorStatus_NULLPointer;
    }

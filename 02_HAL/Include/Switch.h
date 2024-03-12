@@ -15,6 +15,7 @@
 /************************************************Includes************************************************/
  #include "Typedefs.h"
  #include "Switch_cfg.h"
+ #include "ErrorStatus.h"
 /********************************************************************************************************/
 
 
@@ -40,38 +41,10 @@
  *@brief: enum of the states that a switch can be on them.
  */
  typedef enum{
-    uint32_t enuSwitch_Released;
-    uint32_t enuSwitch_Pressed;
+   enuSwitch_Released,
+   enuSwitch_Pressed
  }enuSwitchState_t;
 
- typedef enum
- {
-    /**
- 	*@brief : Everything OK, The Function Performed Correctly.
-	*/
-    enuErrorStatus_Ok,
-    /**
-	*@brief : Something went Wrong, The Function didn't Perform Incorrectly.
-	*/
-    enuErrorStatus_NotOk,
-    /**
-	*@brief : Passing NULL Pointer.
-	*/
-    enuErrorStatus_NULLPointer,
-    /**
-	*@brief : The Function Timed out.
-	*/ 
-    enuErrorStatus_Timeout,
-    /**
-	*@brief : The Function Timed out.
-	*/ 
-    enuErrorStatus_InvalidParameter,
-    /**
-    *@brief : Something is wrong in the configurations
-    */
-    enuErrorStatus_InvalidCfg
-
- }enuErrorStatus_t;
 /********************************************************************************************************/
 
 
