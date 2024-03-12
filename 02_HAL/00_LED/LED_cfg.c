@@ -27,18 +27,17 @@
 
 
 /************************************************Variables***********************************************/
- const LEDcfg_t LEDs[_LED_num]
- {
-    [Alarm_LED]   = {.Port         = GPIO_PORT_A,
-                     .Pin          = GPIO_PIN_0,
-                     .Connection   = LED_CONNECTION_FORWARD,
-                     .DefaultState = LED_STATE_OFF              },
+ const LEDcfg_t LEDs[_LED_num] =
+ { [Alarm_LED]   = {.Port         = GPIO_PORT_A,
+                    .Pin          = GPIO_PIN_0,
+                    .Connection   = LED_CONNECTION_FORWARD,
+                    .DefaultState = LED_STATE_OFF              },
                      
     [PowerON_LED] = {.Port         = GPIO_PORT_B,
                      .Pin          = GPIO_PIN_0,
                      .Connection   = LED_CONNECTION_REVERSE,
-                     .DefaultState = LED_STATE_ON             },
- };
+                     .DefaultState = LED_STATE_ON             } 
+};
 /********************************************************************************************************/
 
 
