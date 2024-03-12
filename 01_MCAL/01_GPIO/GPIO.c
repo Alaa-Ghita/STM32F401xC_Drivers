@@ -4,7 +4,7 @@
 * @author  : Alaa Ghita
 * @date    : Feb 2024
 * @version : 0.1v
-* Driver   : GPIO Driver
+* Driver   : GPIO Driver (MCAL)
 * Machine  : STM32F401xC 
 * 
 */
@@ -28,32 +28,32 @@
  #define GPIO_OTYPE_MASK            0x00000020
 
  #define MASK_1BIT                  0x00000001
- #define MASK_2BITS                 0x00000002
- #define MASK_3BITS                 0x00000003
- #define MASK_4BITS                 0x00000004
+ #define MASK_2BITS                 0x00000003
+ #define MASK_3BITS                 0x00000007
+ #define MASK_4BITS                 0x0000000f
 
- #define IS_VALID_PORT_PIN(PORT, PIN)         ((((PORT) == GPIO_PORT_A)  || \
-                                                ((PORT) == GPIO_PORT_B)) && \
-                                               (((PIN) >= GPIO_PIN_0)    && \
-                                                ((PIN) <= GPIO_PIN_15))) || \
-                                              (((PORT) == GPIO_PORT_C)   && \
-                                               (((PIN) >= GPIO_PIN_13)   && \
+ #define IS_VALID_PORT_PIN(PORT, PIN)         ((((PORT) == GPIO_PORT_A)  ||\
+                                                ((PORT) == GPIO_PORT_B)) &&\
+                                               (((PIN) >= GPIO_PIN_0)    &&\
+                                                ((PIN) <= GPIO_PIN_15))) ||\
+                                              (((PORT) == GPIO_PORT_C)   &&\
+                                               (((PIN) >= GPIO_PIN_13)   &&\
                                                 ((PIN) <= GPIO_PIN_15)))
 
- #define IS_VALID_MODE(MODE)        (  ((MODE) == GPIO_MODE_IN)       || ((MODE) == GPIO_MODE_OUT_PP) \
-                                    || ((MODE) == GPIO_MODE_OUT_OD)   || ((MODE) == GPIO_MODE_AF_PP)  \
+ #define IS_VALID_MODE(MODE)        (  ((MODE) == GPIO_MODE_IN)       || ((MODE) == GPIO_MODE_OUT_PP)\
+                                    || ((MODE) == GPIO_MODE_OUT_OD)   || ((MODE) == GPIO_MODE_AF_PP)\
                                     || ((MODE) == GPIO_MODE_AF_OD)    || ((MODE) == GPIO_MODE_ANALOG) )
 
- #define IS_VALID_OSPEED(SPEED)      (  ((SPEED) == GPIO_OSPEED_LOW)  || ((SPEED) == GPIO_OSPEED_MEDIUM) \ 
+ #define IS_VALID_OSPEED(SPEED)      (  ((SPEED) == GPIO_OSPEED_LOW)  || ((SPEED) == GPIO_OSPEED_MEDIUM)\
                                      || ((SPEED) == GPIO_OSPEED_HIGH) || ((SPEED) == GPIO_OSPEED_VERYHIGH))
 
- #define IS_VALID_OUTPUT(MODE)      (  ((MODE) == GPIO_MODE_OUT_PP)   || ((MODE) == GPIO_MODE_OUT_OD) \ 
-                                    || ((MODE) == GPIO_MODE_AF_PP)    || ((MODE) == GPIO_MODE_AF_OD)  )
+ #define IS_VALID_OUTPUT(MODE)      (  ((MODE) == GPIO_MODE_OUT_PP)   || ((MODE) == GPIO_MODE_OUT_OD)\
+                                    || ((MODE) == GPIO_MODE_AF_PP)    || ((MODE) == GPIO_MODE_AF_OD))
 
- #define IS_VALID_PULL(PULL)        (  ((PULL) == GPIO_PUPD_NONE)     || ((PULL) == GPIO_PUPD_PU) \ 
+ #define IS_VALID_PULL(PULL)        (  ((PULL) == GPIO_PUPD_NONE)     || ((PULL) == GPIO_PUPD_PU)\ 
                                     || ((PULL) == GPIO_PUPD_PD) )
 
- #define IS_VALID_VALUE(VALUE)       ( ((VALUE) == PIN_VALUE_HIGH) || ((VALUE) == PIN_VALUE_LOW))
+ #define IS_VALID_VALUE(VALUE)       (((VALUE) == PIN_VALUE_HIGH) || ((VALUE) == PIN_VALUE_LOW))
 
 
 /*Types*/
@@ -75,26 +75,26 @@ typedef struct
 
 
 /*Variables*/
-static volatile GPIOx_t * const GPIOx [] =
-{
-    [GPIO_PORT_A] = (static volatile GPIOx_t * const) (GPIOA_BASE_ADD),
-    [GPIO_PORT_B] = (static volatile GPIOx_t * const) (GPIOB_BASE_ADD),
-    [GPIO_PORT_C] = (static volatile GPIOx_t * const) (GPIOC_BASE_ADD)
-    /*
-    [GPIO_PORT_D] = (static volatile GPIOx_t * const) (GPIOD_BASE_ADD),
-    [GPIO_PORT_E] = (static volatile GPIOx_t * const) (GPIOE_BASE_ADD),
-    [GPIO_PORT_H] = (static volatile GPIOx_t * const) (GPIOH_BASE_ADD)
-    */
-};
+  static volatile GPIOx_t * const GPIOx [] =
+  {
+      [GPIO_PORT_A] = (volatile GPIOx_t * const) (GPIOA_BASE_ADD),
+      [GPIO_PORT_B] = (volatile GPIOx_t * const) (GPIOB_BASE_ADD),
+      [GPIO_PORT_C] = (volatile GPIOx_t * const) (GPIOC_BASE_ADD)
+      /*
+      [GPIO_PORT_D] = (volatile GPIOx_t * const) (GPIOD_BASE_ADD),
+      [GPIO_PORT_E] = (volatile GPIOx_t * const) (GPIOE_BASE_ADD),
+      [GPIO_PORT_H] = (volatile GPIOx_t * const) (GPIOH_BASE_ADD)
+      */
+  };
 /**********/
 
 
 /*Implemention*/
- enuErrorStatus_t GPIO_InitPin(GPIO_PinCfg_t * Pin_Cfg)
+ enuErrorStatus_t GPIO_InitPin(GPIO_PinCfg_t * const Pin_Cfg)
  {
     enuErrorStatus_t Ret_enuErrorStatus = enuErrorStatus_NotOk;
 
-    static volatile GPIOx_t * const GPIO = GPIOx[Pin_Cfg->GPIO_PORT];
+    volatile GPIOx_t * const GPIO = (volatile GPIOx_t * const) (GPIOx[Pin_Cfg->GPIO_PORT]);
     uint32_t Loc_u32GPIO_Temp_Value;
     if(Pin_Cfg == NULL)
     {
@@ -136,7 +136,7 @@ static volatile GPIOx_t * const GPIOx [] =
    return Ret_enuErrorStatus;
  }
 
- enuErrorStatus_t GPIO_SetPinValue(GPIO_PinCfg_t * Pin_Cfg, uint32_t PIN_VALUE)
+ enuErrorStatus_t GPIO_SetPinValue(GPIO_PinCfg_t * const Pin_Cfg, uint32_t PIN_VALUE)
  {
    enuErrorStatus_t Ret_enuErrorStatus = enuErrorStatus_NotOk;
 
@@ -164,7 +164,7 @@ static volatile GPIOx_t * const GPIOx [] =
     return Ret_enuErrorStatus;
  }
 
- enuErrorStatus_t GPIO_GetPinValue(GPIO_PinCfg_t * Pin_Cfg, uint32_t * Pin_State)
+ enuErrorStatus_t GPIO_GetPinValue(GPIO_PinCfg_t * const Pin_Cfg, uint32_t * Pin_State)
  {
    enuErrorStatus_t Ret_enuErrorStatus = enuErrorStatus_NotOk;
    if((Pin_Cfg == NULL) || (Pin_State == NULL))
@@ -181,8 +181,10 @@ static volatile GPIOx_t * const GPIOx [] =
     else
     {
       Ret_enuErrorStatus = enuErrorStatus_Ok;
-      *Pin_State = (&((GPIOx[Pin_Cfg->GPIO_PORT]->IDR)>>Pin_Cfg->GPIO_PIN));
+      *Pin_State = (1&((GPIOx[Pin_Cfg->GPIO_PORT]->IDR)>>Pin_Cfg->GPIO_PIN));
     }
+
+    return Ret_enuErrorStatus;
  }
 
  
