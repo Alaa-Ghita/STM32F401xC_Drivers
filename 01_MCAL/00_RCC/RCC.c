@@ -1,11 +1,11 @@
-/*
+/**
 * 
-* File    : Source File
-* Driver  : RCC Driver
-* Machine : ARM 
-* MC      : STM32F401xC 
-* Author  : Alaa Ghita
-* Date    : Feb 2024
+* @file    : Source File
+* @author  : Alaa Ghita
+* @date    : Feb 2024
+* @version : 0.1v
+* Driver   : RCC Driver (MCAL)
+* Machine  : STM32F401xC 
 * 
 */
 
@@ -35,80 +35,78 @@
 
  #define SET_PRESCALE_CLR_MASK     0xffff030f
 
+ #define PERIPHERALS_CLR_MASK      0x30000000
+
+ #define GET_SYSCLK                (~SYSCLK_CLR_MASK & ((RCC->CFGR)>>SYSCLK_USED))
+
+ #define IS_VALID_CLK(CLK)               (((CLK) == CLK_ON_HSI) || ((CLK) == CLK_ON_HSE)||\
+                                          ((CLK) == CLK_ON_PLL) || ((CLK) == CLK_ON_PLLI2S)||\
+                                          ((CLK) == CLK_ON_CSS) || ((CLK) == CLK_ON_HSEBYP))
 /*********/
 
 /*Types*/
  typedef struct
  {
-    uint32_t CR;
-    uint32_t PLLCFGR;
-    uint32_t CFGR;
-    uint32_t CIR;
-    uint32_t AHB1RSTR;
-    uint32_t AHB2RSTR;
-    uint32_t reserved1[2];
-    uint32_t APB1RSTR;
-    uint32_t APB2RSTR;
-    uint32_t reserved2[2];
-    uint32_t AHB1ENR;
-    uint32_t AHB2ENR;
-    uint32_t reserved3[2];
-    uint32_t APB1ENR;
-    uint32_t APB2ENR;
-    uint32_t reserved4[2];
-    uint32_t AHB1LPENR;
-    uint32_t AHB2LPENR;
-    uint32_t reserved5[2];
-    uint32_t APB1LPENR;
-    uint32_t APB2LPENR;
-    uint32_t reserved6[2];
-    uint32_t BDCR;
-    uint32_t CSR;
-    uint32_t reserved7[2];
-    uint32_t SSCGR;
-    uint32_t PLLI2SCFGR;
-    uint32_t reserved8;
-    uint32_t DCKCFGR;
+  volatile uint32_t CR;
+  volatile uint32_t PLLCFGR;
+  volatile uint32_t CFGR;
+  volatile uint32_t CIR;
+  volatile uint32_t AHB1RSTR;
+  volatile uint32_t AHB2RSTR;
+  volatile uint32_t reserved1[2];
+  volatile uint32_t APB1RSTR;
+  volatile uint32_t APB2RSTR;
+  volatile uint32_t reserved2[2];
+  volatile uint32_t AHB1ENR;
+  volatile uint32_t AHB2ENR;
+  volatile uint32_t reserved3[2];
+  volatile uint32_t APB1ENR;
+  volatile uint32_t APB2ENR;
+  volatile uint32_t reserved4[2];
+  volatile uint32_t AHB1LPENR;
+  volatile uint32_t AHB2LPENR;
+  volatile uint32_t reserved5[2];
+  volatile uint32_t APB1LPENR;
+  volatile uint32_t APB2LPENR;
+  volatile uint32_t reserved6[2];
+  volatile uint32_t BDCR;
+  volatile uint32_t CSR;
+  volatile uint32_t reserved7[2];
+  volatile uint32_t SSCGR;
+  volatile uint32_t PLLI2SCFGR;
+  volatile uint32_t reserved8;
+  volatile uint32_t DCKCFGR;
 
  }enuRCCPeri_t;
  
 /*******/
 
 /*Variables*/
- volatile enuRCCPeri_t * const RCC = (volatile enuRCCPeri_t * const)(RCC_BASE_ADDRESS);
+ static volatile enuRCCPeri_t * const RCC = (volatile enuRCCPeri_t * const)(RCC_BASE_ADDRESS);
 /***********/
 
 /*Static Functions Prototypes*/
- uint8_t GetSysCLK();
 /*****************************/
 
 /*Implementation*/
  enuErrorStatus_t RCC_TurnONCLK(uint32_t CLK_ON)
  {
    enuErrorStatus_t Ret_enuErrorStatus = enuErrorStatus_Ok;
-   uint16_t Loc_u8Timeout = 400;
+   uint16_t Loc_u8Timeout = 600;
 
-   switch(CLK_ON)
-   {
-    case CLK_ON_HSI:
-    case CLK_ON_HSE:
-    case CLK_ON_PLL:
-    case CLK_ON_PLLI2S:
-      (RCC->CR) |= (CLK_ON);
+   assert_param(IS_VALID_CLK(CLK_ON));
+   
+    (RCC->CR) |= (CLK_ON);
+    if(((CLK_ON) == CLK_ON_HSI) || ((CLK_ON) == CLK_ON_HSE)|| ((CLK_ON) == CLK_ON_PLL) || ((CLK_ON) == CLK_ON_PLLI2S))
+    {
       while(!((CLK_ON<<1)&RCC->CR) && Loc_u8Timeout!=0)
       {
         Loc_u8Timeout--;
-        Ret_enuErrorStatus = enuErrorStatus_timeout;
+        Ret_enuErrorStatus = enuErrorStatus_Timeout;
       }
-      break;
-    case CLK_ON_CSS:
-    case CLK_ON_HSEBYP:
-      (RCC->CR) |= (CLK_ON);
-      break;
-    default:
-      Ret_enuErrorStatus = enuErrorStatus_NotOk;
-      break;
-   }
+    }
+    else { /*Do Nothing*/ }
+    
    return Ret_enuErrorStatus;
  }
 
@@ -119,7 +117,7 @@
     switch (CLK_ON)
     {
     case CLK_ON_HSI:
-      if(GetSysCLK() != SYSCLK_HSI)
+      if(GET_SYSCLK != SYSCLK_HSI)
       {
         (RCC->CR) &= (~ CLK_ON);
       }
@@ -129,7 +127,7 @@
       }
       break;
     case CLK_ON_HSE:
-      if(GetSysCLK() != SYSCLK_HSE)
+      if(GET_SYSCLK != SYSCLK_HSE)
       {
         (RCC->CR) &= (~ CLK_ON);
       }
@@ -139,7 +137,7 @@
       }
       break;
     case CLK_ON_PLL:
-      if(GetSysCLK() != SYSCLK_PLL)
+      if(GET_SYSCLK != SYSCLK_PLL)
       {
         (RCC->CR) &= (~ CLK_ON);
       }
@@ -217,7 +215,7 @@
 
  uint8_t RCC_GetSysCLK()
  {
-   return GetSysCLK();
+   return GET_SYSCLK;
  }
 
  enuErrorStatus_t RCC_SelectPLLSrc(uint32_t PLLSRC)
@@ -305,18 +303,67 @@
    return Ret_enuErrorStatus;
  }
 
- void RCC_EnablePeri(uint32_t REG, uint32_t PERI)
+ enuErrorStatus_t RCC_AHB1EnablePeri(uint32_t PERI_AHB1)
  {
-  *((&RCC->CR)+REG) |= PERI;
+  /*assert*/
+  PERI_AHB1 = PERI_AHB1 && PERIPHERALS_CLR_MASK; 
+  RCC->AHB1ENR |= PERI_AHB1;
+  return enuErrorStatus_Ok;
  }
 
- void RCC_DisablePeri(uint32_t REG, uint32_t PERI)
+ enuErrorStatus_t RCC_AHB2EnablePeri(uint32_t PERI_AHB2)
  {
-  *((&RCC->CR)+REG) &= (~PERI);
+  /*assert*/
+  PERI_AHB2 = PERI_AHB2 && PERIPHERALS_CLR_MASK;
+  RCC->AHB2ENR |= PERI_AHB2;
+  return enuErrorStatus_Ok;
  }
 
- uint8_t GetSysCLK()
+ enuErrorStatus_t RCC_APB1EnablePeri(uint32_t PERI_APB1)
  {
-   return (~SYSCLK_CLR_MASK & ((RCC->CFGR)>>SYSCLK_USED));
+  /*assert*/
+  PERI_APB1 = PERI_APB1 && PERIPHERALS_CLR_MASK;
+  RCC->APB1ENR |= PERI_APB1;
+  return enuErrorStatus_Ok;
+ }
+
+ enuErrorStatus_t RCC_APB2EnablePeri(uint32_t PERI_APB2)
+ {
+  /*assert*/
+  PERI_APB2 = PERI_APB2 && PERIPHERALS_CLR_MASK;
+  RCC->APB2ENR |= PERI_APB2;
+  return enuErrorStatus_Ok;
+ }
+
+ enuErrorStatus_t RCC_AHB1DisablePeri(uint32_t PERI_AHB1)
+ {
+   /*assert*/
+  PERI_AHB1 = PERI_AHB1 && PERIPHERALS_CLR_MASK;
+  RCC->APB2ENR &= (~PERI_AHB1);
+  return enuErrorStatus_Ok;
+ }
+
+ enuErrorStatus_t RCC_AHB2DisablePeri(uint32_t PERI_AHB2)
+ {
+  /*assert*/
+  PERI_AHB2 = PERI_AHB2 && PERIPHERALS_CLR_MASK;
+  RCC->APB2ENR &= (~PERI_AHB2);
+  return enuErrorStatus_Ok;
+ }
+
+ enuErrorStatus_t RCC_APB1DisablePeri(uint32_t PERI_APB1)
+ {
+  /*assert*/
+  PERI_APB1 = PERI_APB1 && PERIPHERALS_CLR_MASK;
+  RCC->APB2ENR &= (~PERI_APB1);
+  return enuErrorStatus_Ok;
+ }
+
+ enuErrorStatus_t RCC_APB2DisablePeri(uint32_t PERI_APB2)
+ {
+  /*assert*/
+  PERI_APB2 = PERI_APB2 && PERIPHERALS_CLR_MASK;
+  RCC->APB2ENR &= (~PERI_APB2);
+  return enuErrorStatus_Ok;
  }
 /****************/

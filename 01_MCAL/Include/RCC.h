@@ -14,8 +14,10 @@
 
 #include "MASKS.h"
 #include "Typedefs.h"
+#include "ErrorStatus.h"
+#include "assert.h"
 
-/*#defines*/
+/*Defines*/
  /*System Clock Options*/
  #define SYSCLK_HSI           0x00
  #define SYSCLK_HSE           0x01
@@ -58,77 +60,49 @@
  #define PRE_APB2_8           0xc000
  #define PRE_APB2_16          0xe000
 
- /*Peripherals' Registers*/
- #define REG_AHB1ENR          0x30
- #define REG_AHB2ENR          0x34
- #define REG_APB1ENR          0x40
- #define REG_APB2ENR          0x44
 
- /*Peripherals in AHB1ENR Register*/
- #define PERI_AHB1ENR_GPIOAEN      BIT0_MASK
- #define PERI_AHB1ENR_GPIOBEN      BIT1_MASK
- #define PERI_AHB1ENR_GPIOCEN      BIT2_MASK
- #define PERI_AHB1ENR_GPIODEN      BIT3_MASK
- #define PERI_AHB1ENR_GPIOEEN      BIT4_MASK
- #define PERI_AHB1ENR_GPIOHEN      BIT7_MASK
- #define PERI_AHB1ENR_CRCEN        BIT12_MASK
- #define PERI_AHB1ENR_DMA1EN       BIT21_MASK
- #define PERI_AHB1ENR_DMA2EN       BIT22_MASK
+ /*Peripherals connected to AHB1*/
+ #define PERI_AHB1_GPIOA      (uint32_t)0x00000001
+ #define PERI_AHB1_GPIOB      (uint32_t)0x00000002
+ #define PERI_AHB1_GPIOC      (uint32_t)0x00000004
+ #define PERI_AHB1_GPIOD      (uint32_t)0x00000008
+ #define PERI_AHB1_GPIOE      (uint32_t)0x00000010
+ #define PERI_AHB1_GPIOH      (uint32_t)0x00000080
+ #define PERI_AHB1_CRC        (uint32_t)0x00001000
+ #define PERI_AHB1_DMA1       (uint32_t)0x00200000
+ #define PERI_AHB1_DMA2       (uint32_t)0x00400000
 
- /*Peripherals in AHB2ENR Register*/
- #define PERI_AHB2ENR_OTGFSEN      BIT7_MASK
+ /*Peripherals conted to AHB2*/
+ #define PERI_AHB2_OTGFS      (uint32_t)0x40000080
 
- /*Peripherals in APB1ENR Register*/
- #define PERI_APB1ENR_TIM2EN       BIT0_MASK
- #define PERI_APB1ENR_TIM3EN       BIT1_MASK
- #define PERI_APB1ENR_TIM4EN       BIT2_MASK
- #define PERI_APB1ENR_TIM5EN       BIT3_MASK
- #define PERI_APB1ENR_WWDGEN       BIT11_MASK
- #define PERI_APB1ENR_SPI2EN       BIT14_MASK
- #define PERI_APB1ENR_SPI3EN       BIT15_MASK
- #define PERI_APB1ENR_USART2EN     BIT17_MASK
- #define PERI_APB1ENR_I2C1EN       BIT21_MASK
- #define PERI_APB1ENR_I2C2EN       BIT22_MASK
- #define PERI_APB1ENR_I2C3EN       BIT23_MASK
- #define PERI_APB1ENR_PWDEN        BIT28_MASK
+ /*Peripherals connected to APB1*/
+ #define PERI_APB1_TIM2       (uint32_t)0x80000001
+ #define PERI_APB1_TIM3       (uint32_t)0x80000002
+ #define PERI_APB1_TIM4       (uint32_t)0x80000004
+ #define PERI_APB1_TIM5       (uint32_t)0x80000008
+ #define PERI_APB1_WWDG       (uint32_t)0x80000800
+ #define PERI_APB1_SPI2       (uint32_t)0x80004000
+ #define PERI_APB1_SPI3       (uint32_t)0x80008000
+ #define PERI_APB1_USART2     (uint32_t)0x80020000
+ #define PERI_APB1_I2C1       (uint32_t)0x80200000
+ #define PERI_APB1_I2C2       (uint32_t)0x80400000
+ #define PERI_APB1_I2C3       (uint32_t)0x80800000
+ #define PERI_APB1_PW         (uint32_t)0xd0000000
 
- /*Peripherals in APB2ENR Register*/
- #define PERI_APB2ENR_TIM1EN       BIT0_MASK
- #define PERI_APB2ENR_USART1EN     BIT4_MASK
- #define PERI_APB2ENR_USART6EN     BIT5_MASK
- #define PERI_APB2ENR_ADC1EN       BIT8_MASK
- #define PERI_APB2ENR_SDIOEN       BIT11_MASK
- #define PERI_APB2ENR_SPI1EN       BIT12_MASK
- #define PERI_APB2ENR_SPI4EN       BIT13_MASK
- #define PERI_APB2ENR_SYSCFGEN     BIT14_MASK
- #define PERI_APB2ENR_TIM9EN       BIT16_MASK
- #define PERI_APB2ENR_TIM10EN      BIT17_MASK
- #define PERI_APB2ENR_TIM11EN      BIT18_MASK
-
-/**********/
+ /*Peripherals connected to APB2*/
+ #define PERI_APB2_TIM1       (uint32_t)0xc0000001
+ #define PERI_APB2_USART1     (uint32_t)0xc0000010
+ #define PERI_APB2_USART6     (uint32_t)0xc0000020
+ #define PERI_APB2_ADC1       (uint32_t)0xc0000100
+ #define PERI_APB2_SDIO       (uint32_t)0xc0000800
+ #define PERI_APB2_SPI1       (uint32_t)0xc0001000
+ #define PERI_APB2_SPI4       (uint32_t)0xc0002000
+ #define PERI_APB2_SYSCFG     (uint32_t)0xc0004000
+ #define PERI_APB2_TIM9       (uint32_t)0xc0010000
+ #define PERI_APB2_TIM10      (uint32_t)0xc0020000
+ #define PERI_APB2_TIM11      (uint32_t)0xc0040000
 
 /*types*/
-
- typedef enum
- {
-   /**
-	*@brief : Everything OK, The Function Performed Correctly.
-	*/
-   enuErrorStatus_Ok,
-   /**
-	*@brief : Something went Wrong, The Function didn't Perform Incorrectly.
-	*/
-   enuErrorStatus_NotOk,
-   /**
-	*@brief : Passing NULL Pointer.
-	*/
-   enuErrorStatus_NULLPointer,
-   /**
-	*@brief : The Function Timed out.
-	*/ 
-   enuErrorStatus_timeout
-
- }enuErrorStatus_t;
 
 /**********/
 
@@ -183,9 +157,21 @@
  */
  enuErrorStatus_t RCC_SetPrescaler(uint32_t PRE_AHB1, uint32_t PRE_APB1, uint32_t PRE_APB2);
 
- void RCC_EnablePeri(uint32_t REG, uint32_t PERI);
+ enuErrorStatus_t RCC_AHB1EnablePeri(uint32_t PERI_AHB1);
 
- void RCC_DisablePeri(uint32_t REG, uint32_t PERI);
+ enuErrorStatus_t RCC_AHB2EnablePeri(uint32_t PERI_AHB2);
+
+ enuErrorStatus_t RCC_APB1EnablePeri(uint32_t PERI_APB1);
+
+ enuErrorStatus_t RCC_APB2EnablePeri(uint32_t PERI_APB2);
+
+ enuErrorStatus_t RCC_AHB1DisablePeri(uint32_t PERI_AHB1);
+
+ enuErrorStatus_t RCC_AHB2DisablePeri(uint32_t PERI_AHB2);
+
+ enuErrorStatus_t RCC_APB1DisablePeri(uint32_t PERI_APB1);
+
+ enuErrorStatus_t RCC_APB2DisablePeri(uint32_t PERI_APB2);
 
 /******/
 
