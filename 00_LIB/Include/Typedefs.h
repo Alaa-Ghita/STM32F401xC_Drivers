@@ -14,4 +14,6 @@ typedef float                float32_t;
 typedef double               float64_t;
 
 
+#define NULL                 0x00000000
+
 #endif
