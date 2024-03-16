@@ -18,8 +18,6 @@
 
 
 /************************************************Defines*************************************************/
- 
- #define MAX_RUNNNABLES             100
 /********************************************************************************************************/
 
 
@@ -29,7 +27,7 @@
  typedef void (*RunnableCBF_t) (void);
 
  /**
-  * @brief : The Datatype of all runnables created in the system, and passed to the Scheduler to handle them
+  * @brief : The Datatype of all runnables created in the system, you should add all the runnables you need in the Sched_cfg.c file 
  */
  typedef struct
  {
@@ -53,15 +51,6 @@
  * @brief   : Function to intialize the neaded sources for the scheduler
  */
  void Sched_Init(void);
-
- /**
- * @brief   : Function to Register a new runnable to the scheduler
- * @param   : (Add_runnable) a pointer to a struct of type Runnable_t (declared above)
- * @return  : It returns a variable of type enuErrorStatus_t with one of these values:
- *            enuErrorStatus_Ok                 : Successful Operation
- *            enuErrorStatus_NULLPointer        : The pointer passed is NULL, or the priority of the passed runnable is not available
- */
- enuErrorStatus_t Sched_RegisterRunnable(Runnable_t * Add_runnable);
 
  /**
  * @brief   : Function to Start Running the scheduler

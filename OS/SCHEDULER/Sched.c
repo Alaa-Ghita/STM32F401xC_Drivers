@@ -16,7 +16,7 @@
 
 
 /************************************************Defines*************************************************/
- #define SCHED_TICK_TIME                          1
+ #define SCHED_TICK_TIME           1
 /********************************************************************************************************/
 
 
@@ -33,7 +33,8 @@
 
 
 /************************************************Variables***********************************************/
- RunnableInfo_t Runnables[MAX_RUNNNABLES];
+ RunnableInfo_t Runnables[_Runnables_Num];
+ extern const Runnable_t RunnablesUsed[_Runnables_Num];
  static volatile uint32_t PendingTicks = 0;
 /********************************************************************************************************/
 
@@ -49,26 +50,17 @@
 /*********************************************APIs Implementation****************************************/
  void Sched_Init(void)
  {
+    uint32_t Current_Runnable = 0;
+
     SysTick_ConfigClkSrc(SYSTICK_CLK_SRC_PROCESSOR_CLK);
     SysTick_SetTime_ms(SCHED_TICK_TIME);
     SysTick_SetCallBack(Sched_TicksPendingCB);
- }
 
-
- enuErrorStatus_t Sched_RegisterRunnable(Runnable_t * Add_runnable)
- {
-    enuErrorStatus_t Ret_enuErrorStatus = enuErrorStatus_Ok;
-    if((Add_runnable) && (Runnables[Add_runnable->priority].runnable))
+    for(Current_Runnable; Current_Runnable < _Runnables_Num; Current_Runnable++)
     {
-        Runnables[Add_runnable->priority].runnable = Add_runnable;
-        Runnables[Add_runnable->priority].remainTime_ms = Add_runnable->delay_ms;
+        Runnables[Current_Runnable].runnable = &RunnablesUsed[Current_Runnable];
+        Runnables[Current_Runnable].remainTime_ms = RunnablesUsed[Current_Runnable].delay_ms;
     }
-    else
-    {
-        Ret_enuErrorStatus = enuErrorStatus_NULLPointer;
-    }
-
-    return Ret_enuErrorStatus;
  }
 
 
@@ -88,7 +80,7 @@
  static void Sched_Scheduler (void)
  {
     uint32_t RunIndex;
-    for(RunIndex=0; RunIndex < MAX_RUNNNABLES; RunIndex++)
+    for(RunIndex=0; RunIndex < _Runnables_Num; RunIndex++)
     {
         if((Runnables[RunIndex].runnable->CallBack) && (Runnables[RunIndex].remainTime_ms == 0))
         {
