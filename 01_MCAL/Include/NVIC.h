@@ -2,7 +2,7 @@
 * 
 * @file    : NVIC Driver Header File (MCAL)
 * @author  : Alaa Ghita
-* @date    : Feb 2024
+* @date    : Mar 2024
 * @version : 0.1v
 * Machine  : STM32F401xC 
 * 
@@ -48,8 +48,8 @@
   * @brief : The Active States for an IRQ
  */
  typedef enum{
-    ActiveState_Inactive,
-    ActiveState_Active
+    enuActiveState_Inactive,
+    enuActiveState_Active
  }NVIC_ActiveState_t;
 
 /********************************************************************************************************/

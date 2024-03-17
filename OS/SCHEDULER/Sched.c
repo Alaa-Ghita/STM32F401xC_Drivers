@@ -16,7 +16,7 @@
 
 
 /************************************************Defines*************************************************/
- #define SCHED_TICK_TIME           1
+ #define SCHED_TICK_TIME           1000
 /********************************************************************************************************/
 
 
@@ -50,13 +50,13 @@
 /*********************************************APIs Implementation****************************************/
  void Sched_Init(void)
  {
-    uint32_t Current_Runnable = 0;
+    uint32_t Current_Runnable;
 
     SysTick_ConfigClkSrc(SYSTICK_CLK_SRC_PROCESSOR_CLK);
     SysTick_SetTime_ms(SCHED_TICK_TIME);
     SysTick_SetCallBack(Sched_TicksPendingCB);
 
-    for(Current_Runnable; Current_Runnable < _Runnables_Num; Current_Runnable++)
+    for(Current_Runnable = 0; Current_Runnable < _Runnables_Num; Current_Runnable++)
     {
         Runnables[Current_Runnable].runnable = &RunnablesUsed[Current_Runnable];
         Runnables[Current_Runnable].remainTime_ms = RunnablesUsed[Current_Runnable].delay_ms;

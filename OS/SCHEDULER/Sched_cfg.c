@@ -12,12 +12,17 @@
  #include "../Include/Sched_cfg.h"
 /********************************************************************************************************/
 
+/*******************************Call Back Funcations (Runnable Functions)********************************/
+ extern void TrafficLight_Runnable(void);
+/********************************************************************************************************/
+
 /************************************************Types***************************************************/
  const Runnable_t RunnablesUsed[_Runnables_Num] =
- {  [App1_Runnable] = { .Name            = "App1",
-                        .delay_ms        = 3, 
-                        .periodicity_ms  = 10,
-                        .CallBack        = App1_Runnable},
+ {
+    [TrafficLight_Run] = { .Name            = "Traffic Light",
+                           .delay_ms        = 100, 
+                           .periodicity_ms  = 10,
+                           .CallBack        = TrafficLight_Runnable},
 
     [App2_Runnable] = { .Name            = "App2",
                         .delay_ms        = 7, 

@@ -15,8 +15,8 @@
  * @note    : The Order of the Runnables here is the priority of them at executing 
  */
 typedef enum{
-    App1_Runnable,  /*An Example*/
-    App2_Runnable,  /*An Example*/
+    TrafficLight_Run,  /*An Example*/
+    App2_Runnable,     /*An Example*/
     _Runnables_Num  /*MUST KEEP IT AS IT IS*/
 }Runnables_t;
 

@@ -27,8 +27,9 @@
 
  /*List of the LEDs wanted in the system, you can add any LED with any name*/
  typedef enum{
-   Alarm_LED,      /*An Example*/
-   PowerON_LED,    /*An Example*/
+   Green_LED,      /*An Example*/
+   Yellow_LED,    /*An Example*/
+   Red_LED,       /*An Example*/
    _LED_num        /*MUST KEEP IT AS IT IS*/
  }LEDs_t;
 
