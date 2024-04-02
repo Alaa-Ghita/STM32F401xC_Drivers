@@ -29,12 +29,12 @@
 /************************************************Variables***********************************************/
  const Switchcfg_t Switches[_Switch_num] =
  {
-    [PowerON_Switch]   = {.Port         = GPIO_PORT_A,
+    [PowerON_Switch]   = {.Port         = GPIO_PORT_B,
                           .Pin          = GPIO_PIN_1,
                           .Connection   = SWITCH_CONNECTION_FORWARD},
                      
     [PowerOFF_Switch] = {.Port         = GPIO_PORT_B,
-                         .Pin          = GPIO_PIN_1,
+                         .Pin          = GPIO_PIN_2,
                          .Connection   = SWITCH_CONNECTION_REVERSE },
  };
 /********************************************************************************************************/

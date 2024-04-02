@@ -18,10 +18,10 @@
 /*Defines*/
  #define RCC_BASE_ADDRESS          0x40023800
 
- #define HSI_RDY                   1
- #define HSE_RDY                   17
- #define PLL_RDY                   25
- #define PLLI2S_RDY                27
+ #define HSI_RDY                   BIT1_MASK
+ #define HSE_RDY                   BIT17_MASK
+ #define PLL_RDY                   BIT25_MASK
+ #define PLLI2S_RDY                BIT27_MASK
 
  #define SYSCLK_CLR_MASK           (~(0x3))
  #define SYSCLK_USED               2
@@ -94,8 +94,12 @@
    enuErrorStatus_t Ret_enuErrorStatus = enuErrorStatus_Ok;
    uint16_t Loc_u8Timeout = 600;
 
-   assert_param(IS_VALID_CLK(CLK_ON));
-   
+   if(IS_VALID_CLK(CLK_ON) == 0)
+   {
+	   Ret_enuErrorStatus = enuErrorStatus_InvalidParameter;
+   }
+   else
+   {
     (RCC->CR) |= (CLK_ON);
     if(((CLK_ON) == CLK_ON_HSI) || ((CLK_ON) == CLK_ON_HSE)|| ((CLK_ON) == CLK_ON_PLL) || ((CLK_ON) == CLK_ON_PLLI2S))
     {
@@ -106,6 +110,7 @@
       }
     }
     else { /*Do Nothing*/ }
+   }
     
    return Ret_enuErrorStatus;
  }
@@ -306,7 +311,6 @@
  enuErrorStatus_t RCC_AHB1EnablePeri(uint32_t PERI_AHB1)
  {
   /*assert*/
-  PERI_AHB1 = PERI_AHB1 && PERIPHERALS_CLR_MASK; 
   RCC->AHB1ENR |= PERI_AHB1;
   return enuErrorStatus_Ok;
  }
@@ -314,7 +318,6 @@
  enuErrorStatus_t RCC_AHB2EnablePeri(uint32_t PERI_AHB2)
  {
   /*assert*/
-  PERI_AHB2 = PERI_AHB2 && PERIPHERALS_CLR_MASK;
   RCC->AHB2ENR |= PERI_AHB2;
   return enuErrorStatus_Ok;
  }
@@ -322,7 +325,7 @@
  enuErrorStatus_t RCC_APB1EnablePeri(uint32_t PERI_APB1)
  {
   /*assert*/
-  PERI_APB1 = PERI_APB1 && PERIPHERALS_CLR_MASK;
+  //PERI_APB1 = PERI_APB1 && PERIPHERALS_CLR_MASK;
   RCC->APB1ENR |= PERI_APB1;
   return enuErrorStatus_Ok;
  }
@@ -330,7 +333,7 @@
  enuErrorStatus_t RCC_APB2EnablePeri(uint32_t PERI_APB2)
  {
   /*assert*/
-  PERI_APB2 = PERI_APB2 && PERIPHERALS_CLR_MASK;
+  //PERI_APB2 = PERI_APB2 && PERIPHERALS_CLR_MASK;
   RCC->APB2ENR |= PERI_APB2;
   return enuErrorStatus_Ok;
  }
@@ -338,7 +341,7 @@
  enuErrorStatus_t RCC_AHB1DisablePeri(uint32_t PERI_AHB1)
  {
    /*assert*/
-  PERI_AHB1 = PERI_AHB1 && PERIPHERALS_CLR_MASK;
+  //PERI_AHB1 = PERI_AHB1 && PERIPHERALS_CLR_MASK;
   RCC->APB2ENR &= (~PERI_AHB1);
   return enuErrorStatus_Ok;
  }
@@ -346,7 +349,7 @@
  enuErrorStatus_t RCC_AHB2DisablePeri(uint32_t PERI_AHB2)
  {
   /*assert*/
-  PERI_AHB2 = PERI_AHB2 && PERIPHERALS_CLR_MASK;
+  //PERI_AHB2 = PERI_AHB2 && PERIPHERALS_CLR_MASK;
   RCC->APB2ENR &= (~PERI_AHB2);
   return enuErrorStatus_Ok;
  }
@@ -354,7 +357,7 @@
  enuErrorStatus_t RCC_APB1DisablePeri(uint32_t PERI_APB1)
  {
   /*assert*/
-  PERI_APB1 = PERI_APB1 && PERIPHERALS_CLR_MASK;
+  //PERI_APB1 = PERI_APB1 && PERIPHERALS_CLR_MASK;
   RCC->APB2ENR &= (~PERI_APB1);
   return enuErrorStatus_Ok;
  }
@@ -362,7 +365,7 @@
  enuErrorStatus_t RCC_APB2DisablePeri(uint32_t PERI_APB2)
  {
   /*assert*/
-  PERI_APB2 = PERI_APB2 && PERIPHERALS_CLR_MASK;
+  //PERI_APB2 = PERI_APB2 && PERIPHERALS_CLR_MASK;
   RCC->APB2ENR &= (~PERI_APB2);
   return enuErrorStatus_Ok;
  }

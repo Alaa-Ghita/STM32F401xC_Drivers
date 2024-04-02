@@ -110,7 +110,7 @@
  
  /**
  *@brief  : Function to Select the System Clock.
- *@param  : Takes one paramtere as the selected system clock (Choose from the options above).
+ *@param  : Takes one parameter as the selected system clock (Choose from the options above).
  *@return : Error State.                                                                     
  */
  enuErrorStatus_t RCC_SelectSysCLK(uint32_t SYSCLK);

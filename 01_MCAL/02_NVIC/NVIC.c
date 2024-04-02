@@ -16,7 +16,7 @@
 
 
 /************************************************Defines*************************************************/
- #define NVIC_BASE_ADDRESS              0xe000e000
+ #define NVIC_BASE_ADDRESS              0xe000e100
  #define SCB_BASE_ADDRESS               0xe000ed00
 
  #define SCB_AIRCR_CLR                  0x0000f8ff

@@ -85,7 +85,7 @@
 
  /*Pin Output Value Options*/
  #define PIN_VALUE_HIGH                    (uint32_t)0x01
- #define PIN_VALUE_LOW                     (uint32_t)0x02
+ #define PIN_VALUE_LOW                     (uint32_t)0x00
 
 /*********/
 
@@ -121,27 +121,27 @@
 
  /**
  * @brief   : Function to set an output pin High or Low
- * @param   : It takes a pointer to a variable of type GPIO_PinCfg_t containing the desired configurations
+ * @param   : It takes the Pin to be set and the Port of that Pin (Choose from the Options above)
  *          & the value to be presented on the pin.
-*            (Please just choose from the provided options above)
+ *            (Please just choose from the provided options above)
  * @return  : It returns a variable of type enuErrorStatus_t with one of these values:
  *            enuErrorStatus_Ok                 : Successful Operation
  *            enuErrorStatus_NULLPointer        : The pointer parameter equals to NULL
  *            enuErrorStatus_InvalidCfg         : The pin is not configured as an output pin
  *            enuErrorStatus_InvalidParameter   : The Pin Value is not valid
  */
- enuErrorStatus_t GPIO_SetPinValue(GPIO_PinCfg_t * const Pin_Cfg, uint32_t PIN_VALUE);
+ enuErrorStatus_t GPIO_SetPinValue(uint32_t GPIO_PIN, uint32_t GPIO_PORT, uint32_t PIN_VALUE);
 
  /**
  * @brief   : Function to get the current value represented on the pin.
- * @param   : It takes a pointer to a variable of type GPIO_PinCfg_t containing the desired configurations
+ * @param   : It takes the Pin to get its state and the Port of that Pin (Choose from the Options above)
  *          & a Pointer to uint32_t to return the pin state on it
  * @return  : It returns a variable of type enuErrorStatus_t with one of these values:
  *            enuErrorStatus_Ok                 : Successful Operation
  *            enuErrorStatus_NULLPointer        : One or both of the pointer parameters equal to NULL
  *            enuErrorStatus_InvalidCfg         : The configuration of the pin is not right
  */
- enuErrorStatus_t GPIO_GetPinValue(GPIO_PinCfg_t * const Pin_Cfg, uint32_t * Pin_State);
+ enuErrorStatus_t GPIO_GetPinValue(uint32_t GPIO_PIN, uint32_t GPIO_PORT, uint32_t * Pin_State);
 
 /*****/
 

@@ -74,7 +74,7 @@
  {
    enuErrorStatus_t Ret_enuErrorStatus = enuErrorStatus_NotOk;
    uint32_t Loc_u32PinState;
-   uint8_t Loc_u8Timeout = 600;
+   uint16_t Loc_u16Timeout = 600;
    if(IS_VALID_Switch(Copy_u32Switch) == 0)
    {
       Ret_enuErrorStatus = enuErrorStatus_InvalidParameter;
@@ -86,17 +86,23 @@
    else
    {
       Ret_enuErrorStatus = enuErrorStatus_Ok;
-      Ret_enuErrorStatus = GPIO_GetPinValue( &Switches[Copy_u32Switch].Pin , &Loc_u32PinState);
+      Ret_enuErrorStatus = GPIO_GetPinValue( Switches[Copy_u32Switch].Pin, Switches[Copy_u32Switch].Port , &Loc_u32PinState);
       if(Ret_enuErrorStatus == enuErrorStatus_Ok)
       {
-        if(Loc_u32PinState ^ Switches[Copy_u32Switch].Connection)
+        if(!(Loc_u32PinState ^ Switches[Copy_u32Switch].Connection))
         {
-          while((Loc_u32PinState ^ Switches[Copy_u32Switch].Connection) && Loc_u8Timeout)
+          while((!(Loc_u32PinState ^ Switches[Copy_u32Switch].Connection)) && (Loc_u16Timeout--))
           {
-            Ret_enuErrorStatus = GPIO_GetPinValue( &Switches[Copy_u32Switch].Pin , &Loc_u32PinState);
-            Loc_u8Timeout--;
+            Ret_enuErrorStatus = GPIO_GetPinValue( Switches[Copy_u32Switch].Pin, Switches[Copy_u32Switch].Port , &Loc_u32PinState);
           }
-          *Add_enuSwitchState = enuSwitch_Pressed;
+          if(Loc_u16Timeout)
+          {
+        	  *Add_enuSwitchState = enuSwitch_Pressed;
+          }
+          else
+          {
+        	  *Add_enuSwitchState = enuSwitch_Released;
+          }
         }
         else
         {

@@ -53,7 +53,7 @@
    GPIO_PinCfg_t Loc_CurrentLed;
    Loc_CurrentLed.GPIO_MODE = GPIO_MODE_OUT_PP;
    Loc_CurrentLed.GPIO_OSPEED = GPIO_OSPEED_HIGH;
-   for(Loc_u8Counter; Loc_u8Counter < _LED_num ; Loc_u8Counter++)
+   for(Loc_u8Counter = 0; Loc_u8Counter < _LED_num ; Loc_u8Counter++)
    {
       if(IS_VALID_CONNECTION(LEDs[Loc_u8Counter].Connection)
          && IS_VALID_STATE(LEDs[Loc_u8Counter].DefaultState))
@@ -64,7 +64,7 @@
          Ret_enuErrorStatus = GPIO_InitPin(&Loc_CurrentLed);
          if (Ret_enuErrorStatus != enuErrorStatus_Ok)
          { break; }
-         Ret_enuErrorStatus = GPIO_SetPinValue( &Loc_CurrentLed , (LEDs[Loc_u8Counter].Connection)^(LEDs[Loc_u8Counter].DefaultState));
+         Ret_enuErrorStatus = GPIO_SetPinValue( LEDs[Loc_u8Counter].Pin, LEDs[Loc_u8Counter].Port, (LEDs[Loc_u8Counter].Connection)^(LEDs[Loc_u8Counter].DefaultState));
          if (Ret_enuErrorStatus != enuErrorStatus_Ok)
          { break; }
       }
@@ -88,7 +88,7 @@
    else
    {
       Ret_enuErrorStatus = enuErrorStatus_Ok;
-      Ret_enuErrorStatus = GPIO_SetPinValue( &LEDs[Copy_u32LED].Pin, (LEDs[Copy_u32LED].Connection)^LED_STATE);
+      Ret_enuErrorStatus = GPIO_SetPinValue(LEDs[Copy_u32LED].Pin, LEDs[Copy_u32LED].Port, (LEDs[Copy_u32LED].Connection)^LED_STATE);
    }
    return Ret_enuErrorStatus;
  }

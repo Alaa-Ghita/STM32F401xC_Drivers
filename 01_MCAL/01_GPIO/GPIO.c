@@ -24,34 +24,33 @@
  #define GPIOH_BASE_ADD             0x40021c00
  */
 
- #define GPIO_MODE_MASK             0x00000002
- #define GPIO_OTYPE_MASK            0x00000020
+ #define GPIO_MODE_MASK             0x00000003
+ #define GPIO_OTYPE_MASK            0x00000030
 
  #define MASK_1BIT                  0x00000001
  #define MASK_2BITS                 0x00000003
  #define MASK_3BITS                 0x00000007
  #define MASK_4BITS                 0x0000000f
 
- #define IS_VALID_PORT_PIN(PORT, PIN)         ((((PORT) == GPIO_PORT_A)  ||\
-                                                ((PORT) == GPIO_PORT_B)) &&\
-                                               (((PIN) >= GPIO_PIN_0)    &&\
-                                                ((PIN) <= GPIO_PIN_15))) ||\
-                                              (((PORT) == GPIO_PORT_C)   &&\
-                                               (((PIN) >= GPIO_PIN_13)   &&\
-                                                ((PIN) <= GPIO_PIN_15)))
+ #define HALF_REGISTER_SIZE         0x10
 
- #define IS_VALID_MODE(MODE)        (  ((MODE) == GPIO_MODE_IN)       || ((MODE) == GPIO_MODE_OUT_PP)\
-                                    || ((MODE) == GPIO_MODE_OUT_OD)   || ((MODE) == GPIO_MODE_AF_PP)\
-                                    || ((MODE) == GPIO_MODE_AF_OD)    || ((MODE) == GPIO_MODE_ANALOG) )
+#define NUM_OF_PORTS				6
+#define NUM_OF_PIN_PER_PORT			16
 
- #define IS_VALID_OSPEED(SPEED)      (  ((SPEED) == GPIO_OSPEED_LOW)  || ((SPEED) == GPIO_OSPEED_MEDIUM)\
-                                     || ((SPEED) == GPIO_OSPEED_HIGH) || ((SPEED) == GPIO_OSPEED_VERYHIGH))
+ #define IS_VALID_PORT(PORT)          ((PORT) < NUM_OF_PORTS)
+ #define IS_VALID_PIN(PIN)            ((PIN)  < NUM_OF_PIN_PER_PORT)
 
- #define IS_VALID_OUTPUT(MODE)      (  ((MODE) == GPIO_MODE_OUT_PP)   || ((MODE) == GPIO_MODE_OUT_OD)\
-                                    || ((MODE) == GPIO_MODE_AF_PP)    || ((MODE) == GPIO_MODE_AF_OD))
+ #define IS_VALID_MODE(MODE)        (((MODE) == GPIO_MODE_IN)      || ((MODE) == GPIO_MODE_OUT_PP)||\
+                                    ((MODE) == GPIO_MODE_OUT_OD)   || ((MODE) == GPIO_MODE_AF_PP)||\
+                                    ((MODE) == GPIO_MODE_AF_OD)    || ((MODE) == GPIO_MODE_ANALOG) )
 
- #define IS_VALID_PULL(PULL)        (  ((PULL) == GPIO_PUPD_NONE)     || ((PULL) == GPIO_PUPD_PU)\ 
-                                    || ((PULL) == GPIO_PUPD_PD) )
+ #define IS_VALID_OSPEED(SPEED)      (((SPEED) == GPIO_OSPEED_LOW) || ((SPEED) == GPIO_OSPEED_MEDIUM)||\
+                                     ((SPEED) == GPIO_OSPEED_HIGH) || ((SPEED) == GPIO_OSPEED_VERYHIGH))
+
+ #define IS_VALID_OUTPUT(MODE)      (((MODE) == GPIO_MODE_OUT_PP)  || ((MODE) == GPIO_MODE_OUT_OD)||\
+                                    ((MODE) == GPIO_MODE_AF_PP)    || ((MODE) == GPIO_MODE_AF_OD))
+
+ #define IS_VALID_PULL(PULL)        (((PULL) == GPIO_PUPD_NONE) || ((PULL) == GPIO_PUPD_PU) || ((PULL) == GPIO_PUPD_PD))
 
  #define IS_VALID_VALUE(VALUE)       (((VALUE) == PIN_VALUE_HIGH) || ((VALUE) == PIN_VALUE_LOW))
 
@@ -100,9 +99,10 @@ typedef struct
     {
       Ret_enuErrorStatus = enuErrorStatus_NULLPointer;
     }
-    else if((IS_VALID_PORT_PIN(Pin_Cfg->GPIO_PORT,Pin_Cfg->GPIO_PIN) == 0)
+    else if((IS_VALID_PORT(Pin_Cfg->GPIO_PORT) == 0)
+    	   || (IS_VALID_PIN(Pin_Cfg->GPIO_PIN) == 0)
            || (IS_VALID_MODE(Pin_Cfg->GPIO_OSPEED) == 0)
-           || (IS_VALID_OSPEED(Pin_Cfg->GPIO_OSPEED == 0))
+           || (IS_VALID_OSPEED(Pin_Cfg->GPIO_OSPEED) == 0)
            || (IS_VALID_PULL(Pin_Cfg->GPIO_PUPD) == 0)) 
     {
       Ret_enuErrorStatus = enuErrorStatus_InvalidCfg;
@@ -117,7 +117,7 @@ typedef struct
 
       Loc_u32GPIO_Temp_Value  = GPIO->OTYPER;
       Loc_u32GPIO_Temp_Value &= ~(MASK_1BIT<<Pin_Cfg->GPIO_PIN);
-      Loc_u32GPIO_Temp_Value |= (((GPIO_OTYPE_MASK)&(Pin_Cfg->GPIO_MODE))<<(Pin_Cfg->GPIO_PIN * 2));
+      Loc_u32GPIO_Temp_Value |= ((((GPIO_OTYPE_MASK)&(Pin_Cfg->GPIO_MODE))>>4)<<(Pin_Cfg->GPIO_PIN));
       GPIO->OTYPER            = Loc_u32GPIO_Temp_Value;
 
       
@@ -136,18 +136,11 @@ typedef struct
    return Ret_enuErrorStatus;
  }
 
- enuErrorStatus_t GPIO_SetPinValue(GPIO_PinCfg_t * const Pin_Cfg, uint32_t PIN_VALUE)
+ enuErrorStatus_t GPIO_SetPinValue(uint32_t GPIO_PIN, uint32_t GPIO_PORT, uint32_t PIN_VALUE)
  {
    enuErrorStatus_t Ret_enuErrorStatus = enuErrorStatus_NotOk;
 
-   if(Pin_Cfg == NULL)
-    {
-      Ret_enuErrorStatus = enuErrorStatus_NULLPointer;
-    }
-    else if((IS_VALID_PORT_PIN(Pin_Cfg->GPIO_PORT,Pin_Cfg->GPIO_PIN) == 0)
-           || (IS_VALID_OUTPUT(Pin_Cfg->GPIO_MODE) == 0)
-           || (IS_VALID_OSPEED(Pin_Cfg->GPIO_OSPEED) == 0)
-           || (IS_VALID_PULL(Pin_Cfg->GPIO_PUPD) == 0)) 
+    if((IS_VALID_PORT(GPIO_PORT) == 0) || (IS_VALID_PIN(GPIO_PIN) == 0))
     {
       Ret_enuErrorStatus = enuErrorStatus_InvalidCfg;
     }
@@ -158,30 +151,39 @@ typedef struct
     else
     {
       Ret_enuErrorStatus = enuErrorStatus_Ok;
-      GPIOx[Pin_Cfg->GPIO_PORT]->BSRR |= (1<<Pin_Cfg->GPIO_PIN * PIN_VALUE);
+      switch(PIN_VALUE)
+      {
+        case (PIN_VALUE_LOW): 
+          GPIOx[GPIO_PORT]->BSRR |= (1<<(GPIO_PIN + HALF_REGISTER_SIZE));
+        break;
+        case (PIN_VALUE_HIGH): 
+          GPIOx[GPIO_PORT]->BSRR |= (1<<GPIO_PIN);
+        break;
+        default:
+          /*Do Nothing*/
+        break;
+
+      }
     }
 
     return Ret_enuErrorStatus;
  }
 
- enuErrorStatus_t GPIO_GetPinValue(GPIO_PinCfg_t * const Pin_Cfg, uint32_t * Pin_State)
+ enuErrorStatus_t GPIO_GetPinValue(uint32_t GPIO_PIN, uint32_t GPIO_PORT, uint32_t * Pin_State)
  {
    enuErrorStatus_t Ret_enuErrorStatus = enuErrorStatus_NotOk;
-   if((Pin_Cfg == NULL) || (Pin_State == NULL))
+   if(Pin_State == NULL)
     {
       Ret_enuErrorStatus = enuErrorStatus_NULLPointer;
     }
-    else if((IS_VALID_PORT_PIN(Pin_Cfg->GPIO_PORT,Pin_Cfg->GPIO_PIN) == 0)
-           || (IS_VALID_MODE(Pin_Cfg->GPIO_OSPEED) == 0)
-           || (IS_VALID_OSPEED(Pin_Cfg->GPIO_OSPEED == 0))
-           || (IS_VALID_PULL(Pin_Cfg->GPIO_PUPD) == 0)) 
+   else if((IS_VALID_PORT(GPIO_PORT) == 0) || (IS_VALID_PIN(GPIO_PIN) == 0))
     {
-      Ret_enuErrorStatus = enuErrorStatus_InvalidCfg;
+         Ret_enuErrorStatus = enuErrorStatus_InvalidCfg;
     }
     else
     {
       Ret_enuErrorStatus = enuErrorStatus_Ok;
-      *Pin_State = (1&((GPIOx[Pin_Cfg->GPIO_PORT]->IDR)>>Pin_Cfg->GPIO_PIN));
+      *Pin_State = (1&((GPIOx[GPIO_PORT]->IDR)>>GPIO_PIN));
     }
 
     return Ret_enuErrorStatus;
