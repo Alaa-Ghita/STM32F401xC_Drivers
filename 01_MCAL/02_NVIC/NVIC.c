@@ -17,7 +17,7 @@
 
 /************************************************Defines*************************************************/
  #define NVIC_BASE_ADDRESS              0xe000e100
- #define SCB_BASE_ADDRESS               0xe000ed00
+ #define SCB_BASE_ADDRESS               0xe000e008
 
  #define SCB_AIRCR_CLR                  0x0000f8ff
  #define SCB_AIRCR_CLR_KEY              0x00000700
@@ -64,19 +64,19 @@
  
  typedef struct
  {
-    volatile uint32_t CPUID;
+    volatile uint32_t ACTLR;;
+    volatile uint32_t Reserved1[829];
+    volatile uint32_t CPUID;    
     volatile uint32_t ICSR;
     volatile uint32_t VTOR;
     volatile uint32_t AIRCR;
     volatile uint32_t SCR;
     volatile uint32_t CCR;
-    volatile uint32_t SHPR1;
-    volatile uint32_t SHPR2;
-    volatile uint32_t SHPR3;
+    volatile uint32_t SHPR[3];
     volatile uint32_t SHCSR;
     volatile uint32_t CFSR;
     volatile uint32_t HFSR;
-    volatile uint32_t Reserved1;
+    volatile uint32_t Reserved2;
     volatile uint32_t MMAR;
     volatile uint32_t BFAR;
     volatile uint32_t AFSR;

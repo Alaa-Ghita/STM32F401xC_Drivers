@@ -21,7 +21,7 @@
  #define IS_VALID_CONNECTION(CONNECTION)        (((CONNECTION) == SWITCH_CONNECTION_FORWARD)||\
                                                  ((CONNECTION) == SWITCH_CONNECTION_REVERSE))
 
- #define IS_VALID_Switch(SWITCH)                      ((SWITCH) < _Switch_num)
+ #define IS_VALID_SWITCH(SWITCH)                      ((SWITCH) < _Switch_num)
 
 /********************************************************************************************************/
 
@@ -74,7 +74,7 @@
  enuErrorStatus_t Switch_GetStatus(uint32_t Copy_u32Switch, enuSwitchState_t * Add_enuSwitchState)
  {
    enuErrorStatus_t Ret_enuErrorStatus = enuErrorStatus_NotOk;
-   if(IS_VALID_Switch(Copy_u32Switch) == 0)
+   if(IS_VALID_SWITCH(Copy_u32Switch) == 0)
    {
       Ret_enuErrorStatus = enuErrorStatus_InvalidParameter;
    }
@@ -94,13 +94,13 @@
  /*This Runnable should come every 5ms*/
  void Switch_Runnable(void)
  {
-    static uint32_t Switches_PinStates[_Switch_num] = {0};
+    static uint32_t Switches_PrevStates[_Switch_num] = {0};
     static uint32_t Switches_Counts[_Switch_num] = {0};
     uint32_t Loc_u32SwitchCurState =0; 
     uint16_t Loc_u16Counter = 0;
     for(Loc_u16Counter=0; Loc_u16Counter < _Switch_num; Loc_u16Counter++)
     {
-      GPIO_GetPinValue( &Switches[Loc_u16Counter].Pin , &Loc_u32SwitchCurState);
+      GPIO_GetPinValue(Switches[Loc_u16Counter].Pin, Switches[Loc_u16Counter].Port , &Loc_u32SwitchCurState);
       if(Loc_u32SwitchCurState == Switches_PinStates[Loc_u16Counter])
       {
         Switches_Counts[Loc_u16Counter]++;
@@ -115,7 +115,7 @@
         Switches_PinStates[Loc_u16Counter] = Loc_u32SwitchCurState;
       }
 
-      Switches_PinStates[Loc_u16Counter] = Loc_u32SwitchCurState;
+      Switches_PrevStates[Loc_u16Counter] = Loc_u32SwitchCurState;
     }
  }
 /********************************************************************************************************/
