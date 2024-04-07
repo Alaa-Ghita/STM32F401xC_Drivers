@@ -16,20 +16,20 @@
 
 
 /************************************************Defines*************************************************/
- #define NVIC_BASE_ADDRESS              0xe000e100
- #define SCB_BASE_ADDRESS               0xe000e008
+ #define NVIC_BASE_ADDRESS              0xe000e100U
+ #define SCB_BASE_ADDRESS               0xe000ed00U
 
- #define SCB_AIRCR_CLR                  0x0000f8ff
- #define SCB_AIRCR_CLR_KEY              0x00000700
- #define SCB_AIRCR_PRI_LOCATION         0x00000008
- #define IRQ_IP_SIZE                    0x00000008
+ #define SCB_AIRCR_CLR                  0x0000f8ffU
+ #define SCB_AIRCR_CLR_KEY              0x00000700U
+ #define SCB_AIRCR_PRI_LOCATION         0x00000008U
+ #define IRQ_IP_SIZE                    0x00000008U
 
- #define MASK_8BITS                     0x000000ff
- #define MASK_CLR_3BITS                 0xfffffff8
- #define MASK_CLR_8BITS                 0xffffff00
- #define MASK_CLR_16BITS                0xffff0000
+ #define MASK_8BITS                     0x000000ffU
+ #define MASK_CLR_3BITS                 0xfffffff8U
+ #define MASK_CLR_8BITS                 0xffffff00U
+ #define MASK_CLR_16BITS                0xffff0000U
 
- #define NVIC_MAX_IRQS                  0x000000f0
+ #define NVIC_MAX_IRQS                  0x000000f0U
 
  #define GET_PRIORITY                   ((SCB_AIRCR_CLR_KEY & SCB->AIRCR) >> SCB_AIRCR_PRI_LOCATION)
 
@@ -37,8 +37,8 @@
  #define IS_NOT_NULL(PTR)                                         ((PTR) != NULL)
  #define IS_VALID_PRIGROUP_SUB_BIT(PRIORITY)                      ((PRIORITY) < 8)
  #define IS_VALID_IRQ_PRIORITY(IRQ_PRIORITY)                      ((IRQ_PRIORITY) < 256)
- #define IS_VALID_SUBPRIORITY(PRIORITY_MODE,SUB_PRIORITY)         ((1 << ((PRIORITY_MODE)+ 1)) > (SUB_PRIORITY))
- #define IS_VALID_PREPRIORITY(PRIORITY_MODE,PRE_PRIORITY)         ((1 << (IRQ_IP_SIZE - (PRIORITY_MODE))) < (PRE_PRIORITY))
+ //#define IS_VALID_SUBPRIORITY(PRIORITY_MODE,SUB_PRIORITY)         (((uint32_t)(1 << ((PRIORITY_MODE)+ 1))) > ((uint32_t)(SUB_PRIORITY)))
+ //#define IS_VALID_PREPRIORITY(PRIORITY_MODE,PRE_PRIORITY)         ((1 << (IRQ_IP_SIZE - (PRIORITY_MODE))) < (PRE_PRIORITY))
 /********************************************************************************************************/
 
 
@@ -64,19 +64,19 @@
  
  typedef struct
  {
-    volatile uint32_t ACTLR;;
-    volatile uint32_t Reserved1[829];
-    volatile uint32_t CPUID;    
+    volatile uint32_t CPUID;
     volatile uint32_t ICSR;
     volatile uint32_t VTOR;
     volatile uint32_t AIRCR;
     volatile uint32_t SCR;
     volatile uint32_t CCR;
-    volatile uint32_t SHPR[3];
+    volatile uint32_t SHPR1;
+    volatile uint32_t SHPR2;
+    volatile uint32_t SHPR3;
     volatile uint32_t SHCSR;
     volatile uint32_t CFSR;
     volatile uint32_t HFSR;
-    volatile uint32_t Reserved2;
+    volatile uint32_t Reserved1;
     volatile uint32_t MMAR;
     volatile uint32_t BFAR;
     volatile uint32_t AFSR;
@@ -101,126 +101,193 @@
 /*********************************************APIs Implementation****************************************/
  enuErrorStatus_t NVIC_EnableIRQ(uint32_t NVIC_IRQ)
  {
-   assert_param(IS_VALID_IRQ(NVIC_IRQ));
-   
-   NVIC->ISER[NVIC_IRQ/32] |= (1<<(NVIC_IRQ%32));
-   
-   return enuErrorStatus_Ok;
+   enuErrorStatus_t Ret_enuErrorStatus = enuErrorStatus_Ok;
+   if(IS_VALID_IRQ(NVIC_IRQ) == 0)
+   {
+	   Ret_enuErrorStatus = enuErrorStatus_InvalidParameter;
+   }
+   else
+   {
+	   NVIC->ISER[NVIC_IRQ/32] |= (1<<(NVIC_IRQ%32));
+   }
+   return Ret_enuErrorStatus;
  }
 
 
  enuErrorStatus_t NVIC_DisableIRQ(uint32_t NVIC_IRQ)
  {
-   assert_param(IS_VALID_IRQ(NVIC_IRQ));
+	 enuErrorStatus_t Ret_enuErrorStatus = enuErrorStatus_Ok;
+	 if(IS_VALID_IRQ(NVIC_IRQ) == 0)
+	 {
+		 Ret_enuErrorStatus = enuErrorStatus_InvalidParameter;
+	 }
+
+	 else
+	 {
+		 NVIC->ICER[NVIC_IRQ/32] = (1<<(NVIC_IRQ%32));
+	 }
    
-   NVIC->ICER[NVIC_IRQ/32] |= (1<<(NVIC_IRQ%32));
-   
-   return enuErrorStatus_Ok;
+   return Ret_enuErrorStatus;
  }
 
 
  enuErrorStatus_t NVIC_SetPending(uint32_t NVIC_IRQ)
  {
-   assert_param(IS_VALID_IRQ(NVIC_IRQ));
+	 enuErrorStatus_t Ret_enuErrorStatus = enuErrorStatus_Ok;
+	 if(IS_VALID_IRQ(NVIC_IRQ) == 0)
+	 {
+		 Ret_enuErrorStatus = enuErrorStatus_InvalidParameter;
+	 }
 
-   NVIC->ISPR[NVIC_IRQ/32] |= (1<<(NVIC_IRQ%32));
+	 else
+	 {
+		 NVIC->ISPR[NVIC_IRQ/32] |= (1<<(NVIC_IRQ%32));
+	 }
 
-   return enuErrorStatus_Ok;
+   return Ret_enuErrorStatus;
  }
 
 
  enuErrorStatus_t NVIC_ClearPending(uint32_t NVIC_IRQ)
  {
-   assert_param(IS_VALID_IRQ(NVIC_IRQ));
+	 enuErrorStatus_t Ret_enuErrorStatus = enuErrorStatus_Ok;
+	 if(IS_VALID_IRQ(NVIC_IRQ) == 0)
+	 {
+		 Ret_enuErrorStatus = enuErrorStatus_InvalidParameter;
+	 }
 
-   NVIC->ICPR[NVIC_IRQ/32] |= (1<<(NVIC_IRQ%32));
+	 else
+	 {
+		 NVIC->ICPR[NVIC_IRQ/32] = (1<<(NVIC_IRQ%32));
+	 }
 
-   return enuErrorStatus_Ok;
+   return Ret_enuErrorStatus;
  }
 
 
  enuErrorStatus_t NVIC_GetActiveStatus(uint32_t NVIC_IRQ, NVIC_ActiveState_t * Add_u8pActiveState)
  {
-   assert_param(IS_VALID_IRQ(NVIC_IRQ));
-   assert_param(IS_NOT_NULL(Add_u8pActiveState));
+	 enuErrorStatus_t Ret_enuErrorStatus = enuErrorStatus_Ok;
+	 if(IS_VALID_IRQ(NVIC_IRQ) == 0)
+	 {
+	    Ret_enuErrorStatus = enuErrorStatus_InvalidParameter;
+	 }
+	 else if(IS_NOT_NULL(Add_u8pActiveState) == 0)
+	 {
+		 Ret_enuErrorStatus = enuErrorStatus_NULLPointer;
+	 }
+	 else
+	 {
+		*Add_u8pActiveState = ( 1 & ((NVIC->IABR[NVIC_IRQ/32]) >> (NVIC_IRQ%32)));
+	 }
 
-   *Add_u8pActiveState = ( 1 & ((NVIC->IABR[NVIC_IRQ/32]) >> (NVIC_IRQ%32)));
-
-   return enuErrorStatus_Ok;
+   return Ret_enuErrorStatus;
  }
 
 
  enuErrorStatus_t NVIC_Generate_SW_IRQ(uint32_t NVIC_IRQ)
  {
-   uint32_t Loc_u32STIR_TempValue = NVIC->STIR;
+   enuErrorStatus_t Ret_enuErrorStatus = enuErrorStatus_Ok;
+   if(IS_VALID_IRQ(NVIC_IRQ) == 0)
+   {
+	   Ret_enuErrorStatus = enuErrorStatus_InvalidParameter;
+   }
+   else
+   {
+	   NVIC->STIR = NVIC_IRQ;
+   }
 
-   assert_param(IS_VALID_IRQ(NVIC_IRQ));
-
-   Loc_u32STIR_TempValue &= MASK_CLR_8BITS;
-   Loc_u32STIR_TempValue |= NVIC_IRQ;
-   NVIC->STIR             = Loc_u32STIR_TempValue;
-
-   return enuErrorStatus_Ok;
+   return Ret_enuErrorStatus;
  }
 
 
  enuErrorStatus_t NVIC_SetPriorityGroup(uint32_t NVIC_PRIGROUP_SUB_BIT)
  {
+   enuErrorStatus_t Ret_enuErrorStatus = enuErrorStatus_Ok;
    uint32_t Loc_u32AIRCR_TempValue = SCB->AIRCR;
 
-   assert_param(IS_VALID_PRIGROUP_SUB_BIT(NVIC_PRIGROUP_SUB_BIT));
+   if(IS_VALID_PRIGROUP_SUB_BIT((NVIC_PRIGROUP_SUB_BIT) & 0x0f) == 0)
+   {
+	   Ret_enuErrorStatus = enuErrorStatus_InvalidCfg;
+   }
+   else
+   {
+	   Loc_u32AIRCR_TempValue &= SCB_AIRCR_CLR;
+	   Loc_u32AIRCR_TempValue |= NVIC_PRIGROUP_SUB_BIT;
+	   SCB->AIRCR              = Loc_u32AIRCR_TempValue;
+   }
 
-   Loc_u32AIRCR_TempValue &= SCB_AIRCR_CLR;
-   Loc_u32AIRCR_TempValue |= NVIC_PRIGROUP_SUB_BIT;
-   SCB->AIRCR              = Loc_u32AIRCR_TempValue;
-
-   return enuErrorStatus_Ok;
+   return Ret_enuErrorStatus;
  }
 
 
  enuErrorStatus_t NVIC_SetIRQFullPriority(uint32_t NVIC_IRQ, uint32_t Copy_u32IRQ_PRIORITY)
  {
+   enuErrorStatus_t Ret_enuErrorStatus = enuErrorStatus_Ok;
    uint32_t Loc_u32NVIC_IPRx = NVIC->IPR[NVIC_IRQ/4];
    uint8_t Loc_u8IRQ_IP = 8*(NVIC_IRQ%4);
    
-   assert_param(IS_VALID_IRQ(NVIC_IRQ));
-   assert_param(IS_VALID_IRQ_PRIORITY(Copy_u32IRQ_PRIORITY));
-  
-   Loc_u32NVIC_IPRx     &= ~(MASK_8BITS << Loc_u8IRQ_IP);
-   Loc_u32NVIC_IPRx     |= Copy_u32IRQ_PRIORITY << Loc_u8IRQ_IP;
-   NVIC->IPR[NVIC_IRQ/4] = Loc_u32NVIC_IPRx;
+   if(IS_VALID_IRQ(NVIC_IRQ) == 0)
+   {
+      Ret_enuErrorStatus = enuErrorStatus_InvalidParameter;
+   }
+   else if(IS_VALID_IRQ_PRIORITY(Copy_u32IRQ_PRIORITY) == 0)
+   {
+	   Ret_enuErrorStatus = enuErrorStatus_InvalidCfg;
+   }
+   else
+   {
+      Loc_u32NVIC_IPRx     &= ~(MASK_8BITS << Loc_u8IRQ_IP);
+      Loc_u32NVIC_IPRx     |= Copy_u32IRQ_PRIORITY << Loc_u8IRQ_IP;
+      NVIC->IPR[NVIC_IRQ/4] = Loc_u32NVIC_IPRx;
+   }
 
-   return enuErrorStatus_Ok;
+   return Ret_enuErrorStatus;
  }
 
  
  enuErrorStatus_t NVIC_SetIRQPriority(uint32_t NVIC_IRQ, uint32_t Copy_u8PrePriority, uint32_t Copy_u8SubPriority)
  {
+   enuErrorStatus_t Ret_enuErrorStatus = enuErrorStatus_Ok;
    uint32_t Loc_u32NVIC_IPRx = NVIC->IPR[NVIC_IRQ/4];
    uint8_t Loc_u8IRQ_IP = 8*(NVIC_IRQ%4);
    uint32_t Loc_u32PriorityMode;
    
    Loc_u32PriorityMode = GET_PRIORITY;
 
-   assert_param(IS_VALID_IRQ(NVIC_IRQ));
-   assert_param(IS_VALID_SUBPRIORITY(Loc_u32PriorityMode,Copy_u8SubPriority));
-   assert_param(IS_VALID_PREPRIORITY(Loc_u32PriorityMode,Copy_u8PrePriority));
-
-   Loc_u32NVIC_IPRx     &= ~(MASK_8BITS << Loc_u8IRQ_IP);
-   Loc_u32NVIC_IPRx     |= ((Copy_u8PrePriority << (Loc_u32PriorityMode+1)) | Copy_u8SubPriority);
-   NVIC->IPR[NVIC_IRQ/4] = Loc_u32NVIC_IPRx;
+   if(IS_VALID_IRQ(NVIC_IRQ) == 0 )
+   {
+	   Ret_enuErrorStatus = enuErrorStatus_InvalidParameter;
+   }
+   else if(     (((1 << (Loc_u32PriorityMode+ 1)) > Copy_u8SubPriority) == 0) ||
+		   ( ((1 << (IRQ_IP_SIZE - Loc_u32PriorityMode)) < Copy_u8PrePriority) == 0 )  )
+   {
+	   Ret_enuErrorStatus = enuErrorStatus_InvalidCfg;
+   }
+   else
+   {
+	   Loc_u32NVIC_IPRx     &= ~(MASK_8BITS << Loc_u8IRQ_IP);
+	   Loc_u32NVIC_IPRx     |= ((Copy_u8PrePriority << (Loc_u32PriorityMode+1)) | Copy_u8SubPriority);
+	   NVIC->IPR[NVIC_IRQ/4] = Loc_u32NVIC_IPRx;
+   }
    
-   return enuErrorStatus_Ok;
+   return Ret_enuErrorStatus;
  }
 
 
  enuErrorStatus_t NVIC_GetPriority(uint32_t * Add_u8pPriorityMode)
  {
-   assert_param(IS_NOT_NULL(Add_u8pPriorityMode));
+   enuErrorStatus_t Ret_enuErrorStatus = enuErrorStatus_Ok;
+   if(IS_NOT_NULL(Add_u8pPriorityMode) == 0)
+   {
+	   Ret_enuErrorStatus = enuErrorStatus_NULLPointer;
+   }
+   else
+   {
+      *Add_u8pPriorityMode = GET_PRIORITY;
+   }
 
-   *Add_u8pPriorityMode = GET_PRIORITY;
-
-   return enuErrorStatus_Ok;
+   return Ret_enuErrorStatus;
  }
 
 /********************************************************************************************************/
