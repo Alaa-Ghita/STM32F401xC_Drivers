@@ -8,11 +8,11 @@
 */
 
 /************************************************Includes************************************************/
- #include "../Include/Sched.h"
- #include "../Include/Sched_cfg.h"
+ #include "Sched.h"
+#include "Sched_cfg.h"
 /********************************************************************************************************/
 
-/*******************************Call Back Funcations (Runnable Functions)********************************/
+/*******************************Call Back Functions (Runnable Functions)********************************/
  extern void TrafficLight_Runnable(void);
 /********************************************************************************************************/
 
@@ -20,14 +20,14 @@
  const Runnable_t RunnablesUsed[_Runnables_Num] =
  {
     [TrafficLight_Run] = { .Name            = "Traffic Light",
-                           .delay_ms        = 100, 
-                           .periodicity_ms  = 10,
+                           .delay_ms        = 0,
+                           .periodicity_ms  = 1000,
                            .CallBack        = TrafficLight_Runnable},
 
-    [App2_Runnable] = { .Name            = "App2",
+    /*[App2_Runnable] = { .Name            = "App2",
                         .delay_ms        = 7, 
                         .periodicity_ms  = 5,
-                        .CallBack        = App2_Runnable}
+                        .CallBack        = App2_Runnable}*/
  };
  
 /********************************************************************************************************/

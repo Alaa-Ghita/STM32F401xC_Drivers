@@ -10,9 +10,9 @@
 */
 
 /************************************************Includes************************************************/
- #include "GPIO.h"
  #include "HSwitch.h"
-/********************************************************************************************************/
+ #include "GPIO.h"
+ /********************************************************************************************************/
 
 
 /************************************************Defines*************************************************/
@@ -26,15 +26,15 @@
 
 
 /************************************************Variables***********************************************/
- const Switchcfg_t Switches[_Switch_num] =
+ const HSwitchcfg_t HSwitches[_HSwitch_num] =
  {
-    [PowerON_Switch]   = {.Port         = GPIO_PORT_A,
-                          .Pin          = GPIO_PIN_1,
-                          .Connection   = SWITCH_CONNECTION_FORWARD},
+    [PowerON_HSwitch]   = {.Port         = GPIO_PORT_A,
+                           .Pin          = GPIO_PIN_1,
+                           .Connection   = HSwitch_CONNECTION_FORWARD},
                      
-    [PowerOFF_Switch] = {.Port         = GPIO_PORT_B,
-                         .Pin          = GPIO_PIN_1,
-                         .Connection   = SWITCH_CONNECTION_REVERSE },
+    [PowerOFF_HSwitch] = {.Port         = GPIO_PORT_B,
+                          .Pin          = GPIO_PIN_1,
+                          .Connection   = HSwitch_CONNECTION_REVERSE },
  };
 /********************************************************************************************************/
 

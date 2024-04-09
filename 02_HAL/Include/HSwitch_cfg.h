@@ -27,10 +27,10 @@
 
  /*List of the Switches wanted in the system, you can add any Switch with any name*/
  typedef enum{
-   PowerON_Switch,       /*An Example*/
-   PowerOFF_Switch,      /*An Example*/
-   _Switch_num           /*MUST KEEP IT AS IT IS*/
- }Switches_t;
+   PowerON_HSwitch,       /*An Example*/
+   PowerOFF_HSwitch,      /*An Example*/
+   _HSwitch_num           /*MUST KEEP IT AS IT IS*/
+ }HSwitches_t;
 
 /********************************************************************************************************/
 

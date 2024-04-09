@@ -20,12 +20,12 @@
 
 /************************************************Defines*************************************************/
  /*SysTick Clock Source options*/
- #define SYSTICK_CLK_SRC_EXTERNAL_CLK           (uint32_t)0x00 /*The SysTick Clock source is an external clock (The clock from the RCC (AHB1/8))*/
- #define SYSTICK_CLK_SRC_PROCESSOR_CLK          (uint32_t)0x01 /*The Systick Clock Source is the same as the processor clock*/
+ #define SYSTICK_CLK_SRC_EXTERNAL_CLK           (uint32_t)0x00      /*The SysTick Clock source is an external clock (The clock from the RCC (AHB1/8))*/
+ #define SYSTICK_CLK_SRC_PROCESSOR_CLK          (uint32_t)BIT2_MASK /*The SysTick Clock Source is the same as the processor clock*/
 
  /*SysTick Start Modes */
- #define SYSTICK_MODE_PERIODIC                  (uint32_t)0x000000002 /*The Systick will Count this value none stop, generating an exception each time it reaches the zero*/
- #define SYSTICK_MODE_ONE_TIME                  (uint32_t)0x000000000 /*The Systick will Count this value only once*/
+ #define SYSTICK_MODE_PERIODIC                  (uint32_t)0x000000002 /*The SysTick will Count this value none stop, generating an exception each time it reaches the zero*/
+ #define SYSTICK_MODE_ONE_TIME                  (uint32_t)0x000000000 /*The SysTick will Count this value only once*/
 /********************************************************************************************************/
 
 
@@ -39,7 +39,7 @@
     enuTimerState_Expired
  }enuTimerState_t;
 
- /*The Datatype of the function to be passed as the call back function, to be called inside the handler*/
+ /*The DataType of the function to be passed as the call back function, to be called inside the handler*/
  typedef void (*SysTickCBF_t) (void);
 /********************************************************************************************************/
 

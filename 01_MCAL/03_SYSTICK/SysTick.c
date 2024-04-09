@@ -27,8 +27,8 @@
  #define MAX_VALID_TICKS                         0x00ffffff
  #define NO_MODE                                 0xffffffff
 
- #define CLK_SRC_USED                           (1 & (SysTick->CTRL >> CLKSOURCE_BIT))
- #define CLK_VALUE                              (((CLK_SRC_USED) * (SYSTICK_PROCESSOR_CLK))+((~CLK_SRC_USED) * (SYSTICK_EXTERNAL_CLK)))
+ #define CLK_SRC_USED                           (SysTick->CTRL & CLKSOURCE_BIT_MASK)
+ //#define CLK_VALUE                              (((CLK_SRC_USED) * (SYSTICK_PROCESSOR_CLK))+((!CLK_SRC_USED) * (SYSTICK_EXTERNAL_CLK)))
 
  #define IS_VALID_CLK_SRC(SRC)                  (((SRC) == SYSTICK_CLK_SRC_EXTERNAL_CLK) || ((SRC) == SYSTICK_CLK_SRC_PROCESSOR_CLK))
  #define Is_VALID_SYSTICK_MODE(MODE)            (((MODE) == SYSTICK_MODE_PERIODIC) || ((MODE) == SYSTICK_MODE_ONE_TIME))
@@ -67,7 +67,7 @@
  enuErrorStatus_t SysTick_ConfigClkSrc(uint32_t SYSTICK_CLK_SRC)
  {
    enuErrorStatus_t Ret_enuErrorStatus = enuErrorStatus_NotOk;
-   if(!IS_VALID_CLK_SRC(SYSTICK_CLK_SRC))
+   if(IS_VALID_CLK_SRC(SYSTICK_CLK_SRC) == 0)
    {
       Ret_enuErrorStatus = enuErrorStatus_InvalidCfg;
    }
@@ -83,7 +83,8 @@
  enuErrorStatus_t SysTick_SetTime_ms(uint32_t Copy_u32Time_ms)
  {
    enuErrorStatus_t Ret_enuErrorStatus = enuErrorStatus_NotOk;
-   uint32_t Loc_u32LoadValue = ((Copy_u32Time_ms) * CLK_VALUE/1000)-1; 
+   uint64_t Loc_u32ClockUsed = ((CLK_SRC_USED == SYSTICK_CLK_SRC_PROCESSOR_CLK) ? (SYSTICK_PROCESSOR_CLK) : (SYSTICK_EXTERNAL_CLK));
+   uint32_t Loc_u32LoadValue = (uint32_t)(((uint64_t)Copy_u32Time_ms * Loc_u32ClockUsed)/(uint64_t)1000)-(uint32_t)1;
    if(Loc_u32LoadValue > MAX_VALID_TICKS)
    {
       Ret_enuErrorStatus = enuErrorStatus_InvalidParameter;
@@ -91,6 +92,7 @@
    else
    {
       Ret_enuErrorStatus = enuErrorStatus_Ok;
+      SysTick->VAL       = 0;
       SysTick->LOAD      = Loc_u32LoadValue;
    }
    return Ret_enuErrorStatus;
