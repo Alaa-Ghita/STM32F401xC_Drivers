@@ -1,4 +1,11 @@
-
+/**
+* 
+* @file    : LCD Driver Header File (HAL)
+* @author  : Alaa Ghita
+* @date    : April 2024
+* @version : 0.1v
+* 
+*/
 
 #ifndef	 _LCD_H_
 #define	 _LCD_H_

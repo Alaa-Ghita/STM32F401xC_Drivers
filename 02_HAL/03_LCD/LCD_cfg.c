@@ -1,4 +1,11 @@
-
+/**
+* 
+* @file    : LCD Driver Source Configuration File (HAL)
+* @author  : Alaa Ghita
+* @date    : April 2024
+* @version : 0.1v
+* 
+*/
 
 /************************************************Includes************************************************/
  #include "GPIO.h"
