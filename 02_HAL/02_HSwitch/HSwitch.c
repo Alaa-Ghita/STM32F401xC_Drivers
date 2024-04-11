@@ -85,8 +85,7 @@
    else
    {
       Ret_enuErrorStatus = enuErrorStatus_Ok;
-      /*Need to verify this*/
-      *Add_enuHSwitchState = (HSwitches_PinStates[Copy_u32HSwitch] ^ HSwitches[Copy_u32HSwitch].Connection);
+      *Add_enuHSwitchState = !((HSwitches_PinStates[Copy_u32HSwitch]) ^ (HSwitches[Copy_u32HSwitch].Connection));
    }
    return Ret_enuErrorStatus;
  }
@@ -96,12 +95,12 @@
  {
     static uint32_t HSwitches_PrevStates[_HSwitch_num] = {0};
     static uint32_t HSwitches_Counts[_HSwitch_num] = {0};
-    uint32_t Loc_u32HSwitchCurState =0;
+    static uint32_t Loc_u32HSwitchCurState =0;
     uint16_t Loc_u16Counter = 0;
     for(Loc_u16Counter=0; Loc_u16Counter < _HSwitch_num; Loc_u16Counter++)
     {
-      //GPIO_GetPinValue( &HSwitches[Loc_u16Counter].Pin , &Loc_u32HSwitchCurState);
-      if(Loc_u32HSwitchCurState == HSwitches_PinStates[Loc_u16Counter])
+      GPIO_GetPinValue(HSwitches[Loc_u16Counter].Pin, HSwitches[Loc_u16Counter].Port, &Loc_u32HSwitchCurState);
+      if(Loc_u32HSwitchCurState == HSwitches_PrevStates[Loc_u16Counter])
       {
         HSwitches_Counts[Loc_u16Counter]++;
       }
@@ -110,7 +109,7 @@
         HSwitches_Counts[Loc_u16Counter] = 0;
       }
 
-      if(HSwitches_Counts[Loc_u16Counter] % 5 == 0)
+      if((HSwitches_Counts[Loc_u16Counter] % 5 ) == 0)
       {
         HSwitches_PinStates[Loc_u16Counter] = Loc_u32HSwitchCurState;
       }

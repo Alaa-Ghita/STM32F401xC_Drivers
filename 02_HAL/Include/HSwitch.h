@@ -42,7 +42,8 @@
  */
  typedef enum{
    enuHSwitch_Released,
-   enuHSwitch_Pressed
+   enuHSwitch_Pressed,
+
  }enuHSwitchState_t;
 
 /********************************************************************************************************/

@@ -28,13 +28,13 @@
 /************************************************Variables***********************************************/
  const HSwitchcfg_t HSwitches[_HSwitch_num] =
  {
-    [PowerON_HSwitch]   = {.Port         = GPIO_PORT_A,
+    [PowerON_HSwitch]   = {.Port         = GPIO_PORT_B,
                            .Pin          = GPIO_PIN_1,
                            .Connection   = HSwitch_CONNECTION_FORWARD},
                      
     [PowerOFF_HSwitch] = {.Port         = GPIO_PORT_B,
-                          .Pin          = GPIO_PIN_1,
-                          .Connection   = HSwitch_CONNECTION_REVERSE },
+                          .Pin          = GPIO_PIN_2,
+                          .Connection   = HSwitch_CONNECTION_REVERSE},
  };
 /********************************************************************************************************/
 
