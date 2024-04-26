@@ -124,6 +124,7 @@ typedef struct
     float32_t DIV_fFraction;
     uint8_t DIV_u8Fraction;
     uint8_t OVER8_Value;
+    //float32_t x;
     if((IS_VALID_CHANNEL(Copy_UARTcfg.UART_CHANNEL) == 0) ||
        (IS_VALID_WORD_LENGTH(Copy_UARTcfg.WORD_LENGTH) == 0) ||
        (IS_VALID_STOP_BITS(Copy_UARTcfg.STOP_BITS) == 0) ||
@@ -153,7 +154,7 @@ typedef struct
         OVER8_Value    = (8.0 * (2 - (1&((UART->CR1) >> (OVER8_BIT_NO)))));
         UART_DIV       = (float)UART_SRC_CLK_VALUE / ((float)(OVER8_Value) * (float)Copy_UARTcfg.BaudRate);
         DIV_Mantissa   = (uint16_t) UART_DIV;
-        DIV_fFraction  = (float)((uint16_t)(UART_DIV * 100.0) % 100 ) / (float)(OVER8_Value);
+        DIV_fFraction  = ((float)((uint16_t)(UART_DIV * 100.0) % 100 ) / 100.0) * (float)(OVER8_Value);
         DIV_u8Fraction = ROUND_TO_INTEGER(DIV_fFraction);
         if(DIV_u8Fraction >= OVER8_Value)
         {
@@ -170,9 +171,7 @@ typedef struct
         Loc_u32Temp |= (DIV_Mantissa<<DIV_MANTISSA_START_BIT) | (DIV_u8Fraction);
         UART->BRR    = Loc_u32Temp;
 
-        UART->CR1 |= TE_ENABLE;
-        UART->CR1 |= RE_ENABLE;
-
+        UART->CR1 |= TE_ENABLE | RE_ENABLE;
     }
     return Ret_enuErrorStatus;
  }
@@ -181,7 +180,7 @@ typedef struct
  enuErrorStatus_t UART_SendByte(uint32_t UART_CHANNEL, uint8_t Copy_u8Data)
  {
     enuErrorStatus_t Ret_enuErrorStatus = enuErrorStatus_Ok;
-    uint16_t Loc_u16TimeOut = 6000;
+    volatile uint16_t Loc_u16TimeOut = 6000;
 
     if(IS_VALID_CHANNEL(UART_CHANNEL) == 0)
     {
@@ -189,14 +188,12 @@ typedef struct
     }
     else
     {
-        UARTx[UART_CHANNEL]->CR1 &= ~TCIE_BIT;
         UARTx[UART_CHANNEL]->DR   = Copy_u8Data;
-        UARTx[UART_CHANNEL]->SR  &= ~TC_BIT;
-        while(/* ((UARTx[UART_CHANNEL]->SR & TC_BIT) == 0) && */ (Loc_u16TimeOut != 1)){Loc_u16TimeOut--;};
-        /* if(Loc_u16TimeOut == 0)
+        while(((UARTx[UART_CHANNEL]->SR & TC_BIT) == 0) && (Loc_u16TimeOut != 0)){Loc_u16TimeOut--;}
+        if(Loc_u16TimeOut == 0)
         {
             Ret_enuErrorStatus = enuErrorStatus_Timeout;
-        } */
+        }
     }
     return Ret_enuErrorStatus;
  }
@@ -304,10 +301,8 @@ typedef struct
 		G_CurrTransReq[UART_CHANNEL].User_Req  = *Add_Buffer;
 		G_CurrTransReq[UART_CHANNEL].Index     = 0; 
 
-        UARTx[UART_CHANNEL]->CR1 &= ~TCIE_BIT;
-        UARTx[UART_CHANNEL]->CR1 |= TE_ENABLE;
+        //UARTx[UART_CHANNEL]->CR1 &= ~TCIE_BIT;
         UARTx[UART_CHANNEL]->DR   = G_CurrTransReq[UART_CHANNEL].User_Req.Data_Buffer[G_CurrTransReq[UART_CHANNEL].Index];
-        UARTx[UART_CHANNEL]->SR  &= ~TC_BIT;
         UARTx[UART_CHANNEL]->CR1 |= TCIE_BIT;
     }
     return Ret_enuErrorStatus;
@@ -336,7 +331,6 @@ typedef struct
         G_CurrReceiveReq[UART_CHANNEL].User_Req  = *Add_Buffer;
 		G_CurrReceiveReq[UART_CHANNEL].Index     = 0;
 
-        UARTx[UART_CHANNEL]->CR1 |= RE_ENABLE;
         UARTx[UART_CHANNEL]->CR1 |= RXNEIE_BIT;
     }
     return Ret_enuErrorStatus;
@@ -347,14 +341,15 @@ typedef struct
  {
 	if(UARTx[UART_CHANNEL_1]->SR & TC_BIT)
 	{
-		UARTx[UART_CHANNEL_1]->CR1 &= ~TCIE_BIT;
+		//UARTx[UART_CHANNEL_1]->CR1 &= ~TCIE_BIT;
 		if((G_CurrTransReq[UART_CHANNEL_1].Index < G_CurrTransReq[UART_CHANNEL_1].User_Req.Buffer_Length) /* && (G_CurrTransReq.Req_State == ReqState_Busy) */)
 		{
         	UARTx[UART_CHANNEL_1]->DR   = G_CurrTransReq[UART_CHANNEL_1].User_Req.Data_Buffer[G_CurrTransReq[UART_CHANNEL_1].Index++];
-        	UARTx[UART_CHANNEL_1]->CR1 |= TCIE_BIT;
+        	//UARTx[UART_CHANNEL_1]->CR1 |= TCIE_BIT;
 		}
 		else /*Done transimission*/
 		{
+            UARTx[UART_CHANNEL_1]->CR1 &= ~TCIE_BIT;
 			G_CurrTransReq[UART_CHANNEL_1].Req_State = ReqState_Done;
 			if(G_CurrTransReq[UART_CHANNEL_1].User_Req.Req_CBF)
 			{
@@ -364,14 +359,15 @@ typedef struct
 	}
 	if(UARTx[UART_CHANNEL_1]->SR & RXNE_BIT)
 	{
-		UARTx[UART_CHANNEL_1]->CR1 &= ~RXNEIE_BIT;
+		
 		if(G_CurrReceiveReq[UART_CHANNEL_1].Index < G_CurrReceiveReq[UART_CHANNEL_1].User_Req.Buffer_Length)
 		{
 			G_CurrReceiveReq[UART_CHANNEL_1].User_Req.Data_Buffer[G_CurrReceiveReq[UART_CHANNEL_1].Index++] = UARTx[UART_CHANNEL_1]->DR;
-			UARTx[UART_CHANNEL_1]->CR1 |= RXNEIE_BIT;
+			//UARTx[UART_CHANNEL_1]->CR1 |= RXNEIE_BIT;
 		}
 		else 
 		{
+            UARTx[UART_CHANNEL_1]->CR1 &= ~RXNEIE_BIT;
 			G_CurrReceiveReq[UART_CHANNEL_1].Req_State = ReqState_Done;
 			if(G_CurrReceiveReq[UART_CHANNEL_1].User_Req.Req_CBF)
 			{
@@ -386,14 +382,14 @@ typedef struct
  {
 	if(UARTx[UART_CHANNEL_2]->SR & TC_BIT)
 	{
-		UARTx[UART_CHANNEL_2]->CR1 &= ~TCIE_BIT;
 		if((G_CurrTransReq[UART_CHANNEL_2].Index < G_CurrTransReq[UART_CHANNEL_2].User_Req.Buffer_Length) /* && (G_CurrTransReq.Req_State == ReqState_Busy) */)
 		{
         	UARTx[UART_CHANNEL_2]->DR   = G_CurrTransReq[UART_CHANNEL_2].User_Req.Data_Buffer[G_CurrTransReq[UART_CHANNEL_2].Index++];
-        	UARTx[UART_CHANNEL_2]->CR1 |= TCIE_BIT;
+        	//UARTx[UART_CHANNEL_2]->CR1 |= TCIE_BIT;
 		}
 		else /*Done transimission*/
 		{
+            UARTx[UART_CHANNEL_2]->CR1 &= ~TCIE_BIT;
 			G_CurrTransReq[UART_CHANNEL_2].Req_State = ReqState_Done;
 			if(G_CurrTransReq[UART_CHANNEL_2].User_Req.Req_CBF)
 			{
@@ -403,14 +399,15 @@ typedef struct
 	}
 	if(UARTx[UART_CHANNEL_2]->SR & RXNE_BIT)
 	{
-		UARTx[UART_CHANNEL_2]->CR1 &= ~RXNEIE_BIT;
+		
 		if(G_CurrReceiveReq[UART_CHANNEL_2].Index < G_CurrReceiveReq[UART_CHANNEL_2].User_Req.Buffer_Length)
 		{
 			G_CurrReceiveReq[UART_CHANNEL_2].User_Req.Data_Buffer[G_CurrReceiveReq[UART_CHANNEL_2].Index++] = UARTx[UART_CHANNEL_2]->DR;
-			UARTx[UART_CHANNEL_2]->CR1 |= RXNEIE_BIT;
+			//UARTx[UART_CHANNEL_2]->CR1 |= RXNEIE_BIT;
 		}
 		else 
 		{
+            UARTx[UART_CHANNEL_2]->CR1 &= ~RXNEIE_BIT;
 			G_CurrReceiveReq[UART_CHANNEL_2].Req_State = ReqState_Done;
 			if(G_CurrReceiveReq[UART_CHANNEL_2].User_Req.Req_CBF)
 			{
@@ -424,14 +421,15 @@ typedef struct
  {
 	if(UARTx[UART_CHANNEL_6]->SR & TC_BIT)
 	{
-		UARTx[UART_CHANNEL_6]->CR1 &= ~TCIE_BIT;
+		
 		if((G_CurrTransReq[UART_CHANNEL_6].Index < G_CurrTransReq[UART_CHANNEL_6].User_Req.Buffer_Length) /* && (G_CurrTransReq.Req_State == ReqState_Busy) */)
 		{
         	UARTx[UART_CHANNEL_6]->DR   = G_CurrTransReq[UART_CHANNEL_6].User_Req.Data_Buffer[G_CurrTransReq[UART_CHANNEL_6].Index++];
-        	UARTx[UART_CHANNEL_6]->CR1 |= TCIE_BIT;
+        	//UARTx[UART_CHANNEL_6]->CR1 |= TCIE_BIT;
 		}
 		else /*Done transimission*/
 		{
+            UARTx[UART_CHANNEL_6]->CR1 &= ~TCIE_BIT;
 			G_CurrTransReq[UART_CHANNEL_6].Req_State = ReqState_Done;
 			if(G_CurrTransReq[UART_CHANNEL_6].User_Req.Req_CBF)
 			{
@@ -441,14 +439,15 @@ typedef struct
 	}
 	if(UARTx[UART_CHANNEL_6]->SR & RXNE_BIT)
 	{
-		UARTx[UART_CHANNEL_6]->CR1 &= ~RXNEIE_BIT;
+		
 		if(G_CurrReceiveReq[UART_CHANNEL_6].Index < G_CurrReceiveReq[UART_CHANNEL_6].User_Req.Buffer_Length)
 		{
 			G_CurrReceiveReq[UART_CHANNEL_6].User_Req.Data_Buffer[G_CurrReceiveReq[UART_CHANNEL_6].Index++] = UARTx[UART_CHANNEL_6]->DR;
-			UARTx[UART_CHANNEL_6]->CR1 |= RXNEIE_BIT;
+			//UARTx[UART_CHANNEL_6]->CR1 |= RXNEIE_BIT;
 		}
 		else 
 		{
+            UARTx[UART_CHANNEL_6]->CR1 &= ~RXNEIE_BIT;
 			G_CurrReceiveReq[UART_CHANNEL_6].Req_State = ReqState_Done;
 			if(G_CurrReceiveReq[UART_CHANNEL_6].User_Req.Req_CBF)
 			{
