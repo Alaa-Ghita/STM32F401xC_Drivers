@@ -57,6 +57,14 @@
       {
         Loc_CurrentHSwitch.GPIO_PORT = HSwitches[Loc_u16Counter].Port;
         Loc_CurrentHSwitch.GPIO_PIN  = HSwitches[Loc_u16Counter].Pin;
+
+
+
+
+
+
+
+        
         Loc_CurrentHSwitch.GPIO_PUPD = HSwitches[Loc_u16Counter].Connection + GPIO_PUPD_PU;
         Ret_enuErrorStatus = GPIO_InitPin(&Loc_CurrentHSwitch);
         if (Ret_enuErrorStatus != enuErrorStatus_Ok)

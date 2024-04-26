@@ -22,41 +22,30 @@
 /************************************************Types***************************************************/
  LCDPins_t const LCD_ControlPins[_ControlPins_num] =
  {
-    [Enable_Pin]    = {.Port   = GPIO_PORT_A,
-                       .Pin    = GPIO_PIN_0},
+    [Enable_Pin]    = {.Port   = GPIO_PORT_A, .Pin    = GPIO_PIN_12},
                      
-    [ReadWrite_Pin] = {.Port   = GPIO_PORT_A,
-                       .Pin    = GPIO_PIN_1},
+    [ReadWrite_Pin] = {.Port   = GPIO_PORT_B, .Pin    = GPIO_PIN_5},
 
-    [RegSelect_Pin] = {.Port    = GPIO_PORT_A,
-                       .Pin     = GPIO_PIN_2}
+    [RegSelect_Pin] = {.Port   = GPIO_PORT_B, .Pin     = GPIO_PIN_3}
  };
 
  LCDPins_t const LCD_DataPins[_DataPins_num] =
  {
-    [Data_Pin0] = {.Port   = GPIO_PORT_B,
-                   .Pin    = GPIO_PIN_0},
+    [Data_Pin0] = {.Port   = GPIO_PORT_A, .Pin    = GPIO_PIN_11},
                      
-    [Data_Pin1] = {.Port   = GPIO_PORT_B,
-                   .Pin    = GPIO_PIN_1},
+    [Data_Pin1] = {.Port   = GPIO_PORT_A, .Pin    = GPIO_PIN_10},
 
-    [Data_Pin2] = {.Port   = GPIO_PORT_B,
-                   .Pin    = GPIO_PIN_2},
+    [Data_Pin2] = {.Port   = GPIO_PORT_A, .Pin    = GPIO_PIN_9},
 
-    [Data_Pin3] = {.Port   = GPIO_PORT_B,
-                   .Pin    = GPIO_PIN_3},
+    [Data_Pin3] = {.Port   = GPIO_PORT_A, .Pin    = GPIO_PIN_8},
                      
-    [Data_Pin4] = {.Port   = GPIO_PORT_B,
-                   .Pin    = GPIO_PIN_4},
+    [Data_Pin4] = {.Port   = GPIO_PORT_B, .Pin    = GPIO_PIN_15},
 
-    [Data_Pin5] = {.Port   = GPIO_PORT_B,
-                   .Pin    = GPIO_PIN_5},
+    [Data_Pin5] = {.Port   = GPIO_PORT_B, .Pin    = GPIO_PIN_14},
 
-    [Data_Pin6] = {.Port   = GPIO_PORT_B,
-                   .Pin    = GPIO_PIN_6},
+    [Data_Pin6] = {.Port   = GPIO_PORT_B, .Pin    = GPIO_PIN_13},
                      
-    [Data_Pin7] = {.Port   = GPIO_PORT_B,
-                   .Pin    = GPIO_PIN_7}
+    [Data_Pin7] = {.Port   = GPIO_PORT_B, .Pin    = GPIO_PIN_12}
  };
 /********************************************************************************************************/
 

@@ -1,0 +1,24 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "cppdbg",
+      "request": "launch",
+      "args": [],
+      "stopAtEntry": false,
+      "externalConsole": true,
+      "cwd": "c:/Users/Alaa/Desktop/ITI9M/ComputerArchtichture(ARM)/STM32F401xC_Drivers/02_HAL/Include",
+      "program": "c:/Users/Alaa/Desktop/ITI9M/ComputerArchtichture(ARM)/STM32F401xC_Drivers/02_HAL/Include/build/Debug/outDebug",
+      "MIMode": "gdb",
+      "miDebuggerPath": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    }
+  ]
+}

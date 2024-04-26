@@ -26,7 +26,7 @@
  #define REQ_TYPE_NONE                 0x00
  #define REQ_TYPE_CMD                  0x01
  #define REQ_TYPE_DATA                 0x02
- //#define REQ_TYPE_STRING               0x03
+ #define REQ_TYPE_STRING               0x03
 
  #define LCD_DDRAM_START_ADD           0x80
  #define LCD_SECOND_ROW                0x40
@@ -55,6 +55,7 @@
  {
     const char * S;
     uint16_t Length;
+    uint8_t Data;
     uint8_t CMD;
     ReqState_t State;
     uint8_t Type; 
@@ -89,7 +90,8 @@
 
 /*****************************************Static Functions Prototype*************************************/
  static void InitSM(void);
- static ProcState_t Write_Proc(uint8_t Copy_u8CMD, uint8_t LCD_WRITE_TYPE);
+ static void OperationalSM(void);
+ static ProcState_t Write_Proc(uint8_t Copy_u8Val, uint8_t LCD_WRITE_TYPE);
  static ProcState_t WriteDataHelper_Proc(void);
  static void HW_Init(void);
 /********************************************************************************************************/
@@ -133,7 +135,7 @@
  }
 
 
- enuErrorStatus_t LCD_SetcursorAsynch(uint8_t ROW, uint8_t COLUMN, NotificationCBF_t Add_CallBack)
+ enuErrorStatus_t LCD_SetCursorAsynch(uint8_t ROW, uint8_t COLUMN, NotificationCBF_t Add_CallBack)
  {
     enuErrorStatus_t Ret_enuErrorStatus = enuErrorStatus_Ok;
     uint8_t Loc_u8Location = 0;
@@ -157,6 +159,26 @@
     return Ret_enuErrorStatus;
  }
 
+
+ enuErrorStatus_t LCD_WriteDataAsynch(uint8_t Copy_u8Data, NotificationCBF_t Add_CallBack)
+ {
+    enuErrorStatus_t Ret_enuErrorStatus = enuErrorStatus_Ok;
+    if(/*(LCDState == LCDState_Operational) && */(UserReq.State == ReqState_Ready))
+    {
+        UserReq.State = ReqState_Busy;
+        UserReq.Type = REQ_TYPE_DATA;
+        UserReq.Data = Copy_u8Data;
+        WriteProgress.CB  = Add_CallBack;
+    }
+    else
+    {
+        Ret_enuErrorStatus = enuErrorStatus_NotOk;
+    }
+
+    return Ret_enuErrorStatus;
+ }
+
+
  enuErrorStatus_t LCD_WriteStringAsynch(char * Add_u8pString, uint16_t Copy_u16Length, NotificationCBF_t Add_CallBack)
  {
     enuErrorStatus_t Ret_enuErrorStatus = enuErrorStatus_Ok;
@@ -167,7 +189,7 @@
     else if(/*(LCDState == LCDState_Operational) && */(UserReq.State == ReqState_Ready))
     {
         UserReq.State = ReqState_Busy;
-        UserReq.Type = REQ_TYPE_DATA;
+        UserReq.Type = REQ_TYPE_STRING;
         UserReq.S = Add_u8pString;
         UserReq.Length = Copy_u16Length;
         WriteProgress.CurrentPos = 0;
@@ -329,13 +351,20 @@
         switch (UserReq.Type)
         {
             case (REQ_TYPE_CMD):
-                CurrProcState = Write_Proc(UserReq.CMD,LCD_WRITE_TYPE_CMD);
+                CurrProcState = Write_Proc(UserReq.CMD, LCD_WRITE_TYPE_CMD);
                 if(CurrProcState == ProcState_Done)
                 {
                     UserReq.State = ReqState_Done;
                 }
                 break;
             case (REQ_TYPE_DATA):
+                CurrProcState = Write_Proc(UserReq.Data, LCD_WRITE_TYPE_DATA);
+                if(CurrProcState == ProcState_Done)
+                {
+                    UserReq.State = ReqState_Done;
+                }
+                break;
+            case (REQ_TYPE_STRING):
                 CurrProcState = WriteDataHelper_Proc();
                 if(CurrProcState == ProcState_Done)
                 {
@@ -383,8 +412,7 @@
  }
 
 
- /*This function must be called three times to write a single command, or till it returns a "ProcState_Done" value*/
- static ProcState_t Write_Proc(uint8_t Copy_u8CMD, uint8_t LCD_WRITE_TYPE)
+ static ProcState_t Write_Proc(uint8_t Copy_u8Val, uint8_t LCD_WRITE_TYPE)
  {
     static ProcState_t ProcState = ProcState_Done;
     uint32_t Loc_u32Counter = 0;
@@ -396,7 +424,7 @@
 
         for(Loc_u32Counter = 0; Loc_u32Counter < _DataPins_num; Loc_u32Counter++)
         {
-            GPIO_SetPinValue(LCD_DataPins[Loc_u32Counter].Pin, LCD_DataPins[Loc_u32Counter].Port, ((Copy_u8CMD>>Loc_u32Counter) & 1));
+            GPIO_SetPinValue(LCD_DataPins[Loc_u32Counter].Pin, LCD_DataPins[Loc_u32Counter].Port, ((Copy_u8Val>>Loc_u32Counter) & 1));
         }
 
         GPIO_SetPinValue(LCD_ControlPins[Enable_Pin].Pin, LCD_ControlPins[Enable_Pin].Port, PIN_VALUE_HIGH);
@@ -433,37 +461,4 @@
 
     return ProcState;
  }
- /*static ProcState_t WriteDataProc(void)
- {
-    static ProcState_t ProcState = ProcState_Done;
-    uint32_t Loc_u32Counter = 0;
-    if(ProcState == ProcState_Done)
-    {
-        ProcState = ProcState_Busy;
-        if(IS_NOT_NULL(UserReq.S) && (UserReq.Length > WriteProgress.CurrentPos))
-        {
-            GPIO_SetPinValue(LCD_ControlPins[ReadWrite_Pin].Pin, LCD_ControlPins[ReadWrite_Pin].Port, PIN_VALUE_LOW);
-            GPIO_SetPinValue(LCD_ControlPins[RegSelect_Pin].Pin, LCD_ControlPins[RegSelect_Pin].Port, PIN_VALUE_LOW);
-
-            for(Loc_u32Counter = 0; Loc_u32Counter < _DataPins_num; Loc_u32Counter++)
-            {
-                GPIO_SetPinValue(LCD_DataPins[Loc_u32Counter].Pin, LCD_DataPins[Loc_u32Counter].Port, ((UserReq.S[WriteProgress.CurrentPos]>>Loc_u32Counter) & 1));
-            }
-
-            GPIO_SetPinValue(LCD_ControlPins[Enable_Pin].Pin, LCD_ControlPins[Enable_Pin].Port, PIN_VALUE_HIGH);
-            WriteProgress.CurrentPos++;
-        }
-        else 
-        {
-            UserReq.State = ReqState_Done;
-            ProcState == ProcState_Done;
-        }
-    }
-    else if(ProcState == ProcState_Busy)
-    {
-        GPIO_SetPinValue(LCD_ControlPins[Enable_Pin].Pin, LCD_ControlPins[Enable_Pin].Port, PIN_VALUE_LOW);
-    }
-
-    return ProcState;
- }*/
 /********************************************************************************************************/

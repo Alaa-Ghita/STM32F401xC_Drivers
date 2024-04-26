@@ -129,6 +129,17 @@
  */
  enuErrorStatus_t LCD_SetCursorAsynch(uint8_t ROW, uint8_t CULOMN, NotificationCBF_t Add_CallBack);
 
+ //NOTE : Change this function to take the char to be displayed not the address
+ /**
+ * @brief   : Asynchronous Function to display Data to the LCD (Single Charachter) 
+ * @param   : Add_u8pData is The address of the string to be displayed
+ * @param   : Add_CallBack is the address of a call back function (Notification) to call it after finishing this request (optional, pass a null if you don't want a notification function)
+ * @return  : It returns a variable of type enuErrorStatus_t with one of these values: 
+ *            enuErrorStatus_Ok                 : Successful Operation
+ *            enuErrorStatus_NotOk              : The LCD is currently busy serving another request, and can't take any requests right now.
+ */
+ enuErrorStatus_t LCD_WriteDataAsynch(uint8_t Copy_u8Data, NotificationCBF_t Add_CallBack);
+
  /**
  * @brief   : Asynchronous Function to display a string to the LCD 
  * @param   : Add_u8pString is The address of the string to be displayed (make sure you don't change the value of the string in this address till the request is served)
